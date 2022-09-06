@@ -3,6 +3,38 @@
 
 Answer:
 
+Here is a valid joint probability distribution for some variables, $A$, $B$, and $C$.
+
+$C$
+
+| | $B$ | $\neg B$ |
+| ----- | ----- | ---- |
+| $A$ | 0.15 | 0.05 |
+| $\not A$ | 0.05 | 0.15 |
+
+$\neg C$
+
+| | $B$ | $\neg B$ |
+| ----- | ----- | ---- |
+| $A$ | 0.10 | 0.20 |
+| $\neg A$ | 0.20 | 0.10 |
+
+Let's consider the distribution of $A$ and $B$ independent of $C$:
+
+| | $B$ | $\neg B$ |
+| ----- | ----- | ---- |
+| $A$ | 0.25 | 0.25 |
+| $\neg A$ | 0.25 | 0.25 |
+
+$P(A) = 0.5 = P(A|B)$, therefore $A$ is independent of $B$.
+
+However, $P(A,B|C) = \frac{P(A,B,C)}{P(C)}=\frac{0.15}{0.40} = 0.375 \neq\\ P(A|C) \cdot P(B|C) = \frac{\sum_B P(A|C)}{P(C)}\frac{\sum_A P(B|C)}{P(C)}=\frac{0.20}{0.40}\frac{0.20}{0.40}=0.25$
+
+Because $P(A,B|C)$ is not equal to $P(A|C) \cdot P(B|C)$, $A$ is not independent of $B$ given $C$.  
+
+Therefore, the implication is false.
+
+
 2. Points are sampled uniformly at random from the interval $(0,1)^2$ so that they lie on the line $x+y=1$. Determine the expected squared distance between any two sampled points. 
 
 Answer:
