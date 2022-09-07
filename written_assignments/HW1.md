@@ -43,10 +43,29 @@ Since the question was asking us to find the square distance between two dots th
 
 ![Figure_1](https://user-images.githubusercontent.com/89466889/188962659-a60883f3-50ba-4789-b213-4b6317803149.png)
 
-The length of the line would be $\sqrt{1^2+1^2} = \sqrt{2}$. Now we can rotate the line to aline with x axis and we will get a line from 0 to $\sqrt{2}$. The question now turned into finding square distance between to dots on this line which we no longer care about (x,y). Now, we first fix one of these two points and arbitarily choose it to locate at 0. **We denote this point as x**. Before we can find the expectation of square distance between this choosen point and another random point on the line, we have to know the probability denstiy function of the other point. That will be: 
+The length of the line would be $\sqrt{1^2+1^2} = \sqrt{2}$. Now we can rotate the line to aline with x axis and we will get a line from 0 to $\sqrt{2}$. The question now turned into finding square distance between to dots on this line which we no longer care about (x,y). Now, we first fix one of these two points and arbitarily choose it to locate at 0. **We denote this point as x**. Before we can find the expectation of square distance between this choosen point and another random point on the line, we have to know the probability denstiy function of the other point y. That will be: 
 
+$$
+  p(y) =
+    \begin{cases}
+      1/\sqrt{2} & \text{if $y \in(0,\sqrt{2})$}\\
+      0 & \text{otherwise}
+    \end{cases}       
+$$
 
-$$\int_0^\sqrt{2} x^2 \,dx= \frac13$$
+The f(y) would be:
+$$f(y) = (y-x)^2$$
+
+Respect to the Expectation formula $$E(f(x)) = \sum_{x} f(x)p_{x}(x)$$
+We plug in our numbers: $$E(f(y)) = \sum_{y} (y-x)^21/\sqrt{2}$$
+Since we are working with a continuous variables so we generalize it into integral:
+
+$$1/\sqrt{2}\int_0^\sqrt{2} (y-x)^2dy$$
+
+Now we have a expectation with a **fixed x** and we are going to generalize it to a **random x**.
+We do that by again apply the Expectation formula on the previously fixed point but this time our f(x) has changed to: $$1/\sqrt{2}\int_0^\sqrt{2} (y-x)^2dy$$
+Pluging in numbers we will get: $$1/\sqrt{2}\int_0^\sqrt{2}1/\sqrt{2}\int_0^\sqrt{2} (y-x)^2dydx$$
+Aftere calculation we get the final expectation of square distance of two random points on the line which is $\frac13$
 
 3. Describe two learning tasks that might be suitable for machine learning approaches. For each task, write down the goal, a possible performance measure, what examples you might get and what a suitable hypothesis space might be. Be original---don’t write about tasks discussed in class or described in the texts. Preferably select tasks from your research area (if any). Describe any aspect of the task(s) that may not fit well with the supervised learning setting and feature vector representation we have discussed. 
 
