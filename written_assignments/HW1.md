@@ -73,3 +73,7 @@ This kind of learning is impossible for a couple reasons– first, in most learn
 6. Explain in your own words: why picking a good example representation is important for learning. Try to use good, intuitive examples from human learning to motivate your arguments.
 
 Answer: 
+
+  A good example representation is important because a good example representation contains relatively few attributes which can significantly decrease the entropy after partitioning the dataset into two and will not run out of attributes. On the contrary a bad example representation could have a lot of concepts which only focus on trivial properties so that it could result in a huge hypothesis space and not effectively partition examples. A huge hypothesis space will increase the cost of learning.
+  A bad human learning example representation could be “A lion is an animal with brown fur, four legs, two eyes, two ears.” In this situation these concepts do not contain enough information to partition lions from other animals like capybaras, foxes, or marmots, and it will end up having an impure node which only contains the chance that animal would be a lion. 
+
