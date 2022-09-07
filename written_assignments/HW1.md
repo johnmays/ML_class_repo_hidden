@@ -53,7 +53,7 @@ For synthesizing speech, solving the problem would likely require a GAN, so the 
 
 <p align="center">$E(log(1-D(G(n)))$</p>
 
-where G(n) is a sample generated from random noise n, and D(x) is the discriminator’s estimate that a given sample is real. The lower this value is, the more the discriminator believes the fake speech, and the better the generator network is performing.
+where G(n) is a sample generated from random noise n, and D(x) is the discriminator’s estimate that a given sample x is real. The lower this value is, the more the discriminator believes the fake speech, and the better the generator network is performing.
 
 
 4. Explain in your own words: why memorization should not be considered a valid learning approach. Try to use good, intuitive examples from human learning to motivate your arguments.
