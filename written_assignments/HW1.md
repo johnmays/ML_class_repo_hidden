@@ -39,6 +39,15 @@ Therefore, the implication is false.
 
 Answer:
 
+Since the question was asking us to find the square distance between two dots that lies on the line $x+y=1$ from interval $(0,1)^2$. We can draw a line in xy-plane which contains all possible dots.
+
+![Figure_1](https://user-images.githubusercontent.com/89466889/188962659-a60883f3-50ba-4789-b213-4b6317803149.png)
+
+The length of the line would be $\sqrt{1^2+1^2} = \sqrt{2}$. Now we can rotate the line to aline with x axis and we will get a line from 0 to $\sqrt{2}$. The question now turned into finding square distance between to dots on this line which we no longer care about (x,y). Now, we first fix one of these two points and arbitarily choose it to locate at 0. **We denote this point as x**. Before we can find the expectation of square distance between this choosen point and another random point on the line, we have to know the probability denstiy function of the other point. That will be: 
+
+
+$$\int_0^\sqrt{2} x^2 \,dx= \frac13$$
+
 3. Describe two learning tasks that might be suitable for machine learning approaches. For each task, write down the goal, a possible performance measure, what examples you might get and what a suitable hypothesis space might be. Be original---don’t write about tasks discussed in class or described in the texts. Preferably select tasks from your research area (if any). Describe any aspect of the task(s) that may not fit well with the supervised learning setting and feature vector representation we have discussed. 
 
 Answer: 
