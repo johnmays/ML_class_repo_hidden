@@ -41,7 +41,20 @@ Answer:
 
 3. Describe two learning tasks that might be suitable for machine learning approaches. For each task, write down the goal, a possible performance measure, what examples you might get and what a suitable hypothesis space might be. Be original---don’t write about tasks discussed in class or described in the texts. Preferably select tasks from your research area (if any). Describe any aspect of the task(s) that may not fit well with the supervised learning setting and feature vector representation we have discussed. 
 
-Answer:
+Answer: 
+
+Two learning tasks that could be solved with machine learning might be 
+- learning to synthesize natural-sounding syllables of human speech (James’ research), 
+- and learning to determine the locations of cells in an image (John’s research).
+
+For determining cell locations in an image, the goal would be to generate values that correctly describe the locations of cells. A good performance measure would be the sum of the distances between the predicted locations of cells and the true locations. Learning examples would be images of cells annotated with the true locations of the cells in those images.
+
+For synthesizing speech, solving the problem would likely require a GAN, so the goal of the network would be to generate speech samples that could ‘fool’ a discriminator network. Learning examples would be real samples of speech, and a good performance measure would be the conventional formula for GAN loss,
+
+<p align="center">$E(log(1-D(G(n)))$</p>
+
+where G(n) is a sample generated from random noise n, and D(x) is the discriminator’s estimate that a given sample is real. The lower this value is, the more the discriminator believes the fake speech, and the better the generator network is performing.
+
 
 4. Explain in your own words: why memorization should not be considered a valid learning approach. Try to use good, intuitive examples from human learning to motivate your arguments.
 
@@ -52,6 +65,10 @@ Memorization is not learning.  There is no real induction being done in the case
 5. Explain in your own words: why tabula rasa learning is impossible. 
 
 Answer: 
+
+ ‘Tabula Rasa’ learning refers to learning with no preexisting limits on your hypothesis space (i.e. no inductive bias). In other words, the learning can consider any concept that decides on a viable output based on a viable input. 
+ 
+This kind of learning is impossible for a couple reasons– first, in most learning situations, the hypothesis space is too large to fully explore. The size of a problem’s hypothesis space varies factorially with the number of input attributes; without some kind of guidance, searching blindly through the possible hypotheses for any real-world problem would be completely infeasible. Second, even given infinite time and computational power, any network without tabula rasa would just opt to memorize the examples it’s seen. Without any kinds of restrictions, a network could consider arbitrarily complex hypotheses, and one of those always perfectly memorizes its training data with no regard for generalization. So, with tabula rasa learning, any network/agent would have no reason to generalize, and if it can’t understand the general case, it hasn’t technically ‘learned’ anything.
 
 6. Explain in your own words: why picking a good example representation is important for learning. Try to use good, intuitive examples from human learning to motivate your arguments.
 
