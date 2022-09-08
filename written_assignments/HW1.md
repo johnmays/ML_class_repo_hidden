@@ -19,7 +19,7 @@ $\neg C$:
 | $A$ | 0.10 | 0.20 |
 | $\neg A$ | 0.20 | 0.10 |
 
-Let's consider the distribution of $A$ and $B$ independent of $C$:
+Let's consider the distribution of $A$ and $B$ without consideration of $C$:
 
 | | $B$ | $\neg B$ |
 | ----- | ----- | ---- |
@@ -30,7 +30,7 @@ $P(A) = 0.5 = \frac{0.25}{0.5} = \frac{P(A,B)}{P(B)} = P(A|B) $, therefore $A$ i
 
 However, $P(A,B|C) = \frac{P(A,B,C)}{P(C)}=\frac{0.15}{0.40} = 0.375 \neq P(A|C) \cdot P(B|C) = \frac{\sum_B P(A|C)}{P(C)}\frac{\sum_A P(B|C)}{P(C)}=\frac{0.20}{0.40}\frac{0.20}{0.40}=0.25$
 
-Because $P(A,B|C)$ is not equal to $P(A|C) \cdot P(B|C)$, $A$ is not independent of $B$ given $C$.  
+Because $P(A,B|C)$ is not equal to $P(A|C) \cdot P(B|C)$, $A$ is not independent of $B$ given $C$, despite the fact that $A$ is independent of $B$.  
 
 Therefore, the implication is false.
 
@@ -43,12 +43,12 @@ Since the question was asking us to find the square distance between two dots th
 
 ![Figure_1](https://user-images.githubusercontent.com/89466889/188962659-a60883f3-50ba-4789-b213-4b6317803149.png)
 
-The length of the line would be $\sqrt{1^2+1^2} = \sqrt{2}$. Now we can rotate the line to aline with x axis and we will get a line from 0 to $\sqrt{2}$. The question now turned into finding square distance between to dots on this line which we no longer care about (x,y). Now, we first fix one of these two points and arbitarily choose it to locate at 0. **We denote this point as x**. Before we can find the expectation of square distance between this choosen point and another random point on the line, we have to know the probability denstiy function of the other point y. That will be: 
+The length of the line would be $\sqrt{1^2+1^2} = \sqrt{2}$. Now we can rotate the line to aline with x axis and we will get a line from 0 to $\sqrt{2}$. The question now turns into finding the square distance between two dots on this line; we no longer care about (x,y). Now, we first fix one of these two points and arbitarily choose to locate it at 0. **We denote this point as x**. Before we can find the expectation of square distance between this choosen point and another random point on the line, we have to know the probability density function of the other point y. That will be: 
 
 $$
   p(y) =
     \begin{cases}
-      1/\sqrt{2} & \text{if $y \in(0,\sqrt{2})$}\\
+      \frac{1}{\sqrt{2}} & \text{if $y \in(0,\sqrt{2})$}\\
       0 & \text{otherwise}
     \end{cases}       
 $$
@@ -56,16 +56,15 @@ $$
 The f(y) would be:
 $$f(y) = (y-x)^2$$
 
-Respect to the Expectation formula $$E(f(x)) = \sum_{x} f(x)p_{x}(x)$$
-We plug in our numbers: $$E(f(y)) = \sum_{y} (y-x)^21/\sqrt{2}$$
-Since we are working with a continuous variables so we generalize it into integral:
+The expectation formula: $$E(f(x)) = \sum_{x} f(x)p_{x}(x)$$
+We plug in our numbers, and since we are working with continuous variables, we use an integral:
 
-$$1/\sqrt{2}\int_0^\sqrt{2} (y-x)^2dy$$
+$$\frac{1}{\sqrt{2}}\int_0^\sqrt{2} (y-x)^2dy$$
 
 Now we have a expectation with a **fixed x** and we are going to generalize it to a **random x**.
-We do that by again apply the Expectation formula on the previously fixed point but this time our f(x) has changed to: $$1/\sqrt{2}\int_0^\sqrt{2} (y-x)^2dy$$
-Pluging in numbers we will get: $$1/\sqrt{2}\int_0^\sqrt{2}1/\sqrt{2}\int_0^\sqrt{2} (y-x)^2dydx$$
-Aftere calculation we get the final expectation of square distance of two random points on the line which is $\frac13$
+We do that by again apply the Expectation formula on the previously fixed point but this time our f(x) has changed to: $$\frac{1}{\sqrt{2}}\int_0^\sqrt{2} (y-x)^2dy$$
+Plugging in numbers, we will get: $$\frac{1}{\sqrt{2}}\int_0^\sqrt{2}\frac{1}{\sqrt{2}}\int_0^\sqrt{2} (y-x)^2dydx$$
+After calculation, we get the final expectation of square distance of two random points on the line which is $\frac{1}{3}$
 
 3. Describe two learning tasks that might be suitable for machine learning approaches. For each task, write down the goal, a possible performance measure, what examples you might get and what a suitable hypothesis space might be. Be original---don’t write about tasks discussed in class or described in the texts. Preferably select tasks from your research area (if any). Describe any aspect of the task(s) that may not fit well with the supervised learning setting and feature vector representation we have discussed. 
 
@@ -73,9 +72,9 @@ Answer:
 
 Two learning tasks that could be solved with machine learning might be 
 - learning to synthesize natural-sounding syllables of human speech (James’ research), 
-- and learning to determine the locations of cells in an image (John’s research).
+- and learning to determine the locations and boundaries of cells in an image (John’s research).
 
-For determining cell locations in an image, the goal would be to generate values that correctly describe the locations of cells. A good performance measure would be the sum of the distances between the predicted locations of cells and the true locations. Learning examples would be images of cells annotated with the true locations of the cells in those images.
+For determining cell locations in an image, the goal would be to generate a set of coordinates that correctly describe the locations and boundaries of cells in the image. A good performance measure would be the sum of the distances between the predicted locations of cells and the true locations. Learning examples would be images of cells annotated with the true locations/boundaries of the cells in those images.
 
 For synthesizing speech, solving the problem would likely require a GAN, so the goal of the network would be to generate speech samples that could ‘fool’ a discriminator network. Learning examples would be real samples of speech, and a good performance measure would be the conventional formula for GAN loss,
 
