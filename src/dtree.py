@@ -10,9 +10,37 @@ from sting.data import Feature, parse_c45
 
 import util
 
-
 # In Python, the convention for class names is CamelCase, just like Java! However, the convention for method and
 # variable names is lowercase_separated_by_underscores, unlike Java.
+
+class TreeNode():
+    def __init__(self) -> None:
+        self.children = []
+        self.attribute = None
+        # jkm100 -- probably going to need some way to identify the test <-- here
+        self._leaf_node = True
+        self.partition = None
+        self.label = None # jkm100 -- going to need to make this 0,1 at some point - only needed for leaft nodes
+
+    @property
+    def _leaf_node(self):
+        return self._leaf_node
+
+    @_leaf_node.setter
+    def _leaf_node(self):
+        if self.children == []:
+            self._leaf_node = True
+        else:
+            self._leaf_node = False
+    
+    @_leaf_node.getter
+    def _leaf_node(self):
+        return self._leaf_node
+
+    
+
+        
+
 class DecisionTree(Classifier):
     def __init__(self, schema: List[Feature], tree_depth_limit=0, use_information_gain=True):
         """
@@ -29,6 +57,7 @@ class DecisionTree(Classifier):
         self._majority_label = 0  # Protected attributes in Python have an underscore prefix
         self.tree_depth_limit = tree_depth_limit
         self.use_information_gain = use_information_gain
+        self.root = TreeNode()
 
     def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None) -> None:
         """
