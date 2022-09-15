@@ -137,3 +137,6 @@ dmypy.json
 
 # macOS
 **/.DS_Store
+
+# Programming Assignment 1
+src/440data

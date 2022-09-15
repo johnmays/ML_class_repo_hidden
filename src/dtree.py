@@ -14,7 +14,7 @@ import util
 # In Python, the convention for class names is CamelCase, just like Java! However, the convention for method and
 # variable names is lowercase_separated_by_underscores, unlike Java.
 class DecisionTree(Classifier):
-    def __init__(self, schema: List[Feature]):
+    def __init__(self, schema: List[Feature], tree_depth_limit=0, use_information_gain=True):
         """
         This is the class where you will implement your decision tree. At the moment, we have provided some dummy code
         where this is simply a majority classifier in order to give you an idea of how the interface works. Don't forget
@@ -27,6 +27,8 @@ class DecisionTree(Classifier):
 
         self._schema = schema  # For some models (like a decision tree) it makes sense to keep track of the data schema
         self._majority_label = 0  # Protected attributes in Python have an underscore prefix
+        self.tree_depth_limit = tree_depth_limit
+        self.use_information_gain = use_information_gain
 
     def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None) -> None:
         """
@@ -93,7 +95,7 @@ def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray
     acc = util.accuracy(y, y_hat)
     print(f'Accuracy:{acc:.2f}')
     print('Size:', 0)
-    print('Maximum Depth:', 0)
+    print('Maximum Depth:', dtree._tree_depth_limit)
     print('First Feature:', dtree.schema[0])
 
     raise NotImplementedError()
@@ -123,11 +125,11 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
         datasets = ((X, y, X, y),)
 
     for X_train, y_train, X_test, y_test in datasets:
-        decision_tree = DecisionTree(schema)
+        decision_tree = DecisionTree(schema, 
+            tree_depth_limit=tree_depth_limit, 
+            use_information_gain=information_gain)
         decision_tree.fit(X_train, y_train)
         evaluate_and_print_metrics(decision_tree, X_test, y_test)
-
-    raise NotImplementedError()
 
 
 if __name__ == '__main__':
