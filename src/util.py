@@ -38,7 +38,7 @@ def entropy(p_x: np.ndarray):
 
     Returns: The Shannon entropy of the variable.
     """
-    return np.sum([p * np.log2(p) for p in p_x])
+    return np.sum([-p * np.log2(p) for p in p_x])
 
 
 def cv_split(
