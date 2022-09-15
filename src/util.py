@@ -83,16 +83,20 @@ def cv_split(
     # Find fold size
     foldsize = int(y.size / folds)
 
-    # Split the ndarray randomly into n fold
+    # Split the ndarray randomly into n fold stratified
     if stratified:
         X_one = X[np.where(X[-1] == 1)]
         X_zero = X[np.where(X[-1] == 0)]
         y_one = y[np.where(y[0] == 1)]
         y_zero = y[np.where(y[0] == 0)]
-            
+
+    # Split the ndarray ramdomly into n fold non-stratified        
     else:
+        # Compute the remainder if examples cannot evenly distribute to each fold
         remainder = len(y)%folds
+        # Compute the first folds-1 fold
         for f in range(0, folds-1):
+            # If there are remainders then add one extra example to first remainder fold
             if f < remainder:
                 result_x, remain_x = getData(X, foldsize+1)
                 x_tup += (result_x,)
@@ -109,9 +113,11 @@ def cv_split(
                 result_y, remain_y = getData(y, foldsize)
                 y_tup += (result_y,)
                 y = remain_y
+        # Append the rest of ndarray as the last fold
         x_tup += (X,)
         y_tup += (y,)
 
+    # Combine the folds into n sets
     result = ()
     for a in range(0, folds):
         result += ((x_tup[0:a]+x_tup[a+1:], y_tup[0:a]+y_tup[a+1:], x_tup[a], y_tup[a]),)
@@ -124,10 +130,28 @@ def cv_split(
 
     return (X, y, X, y),
 
+
 def getData(array: np.ndarray, num: int):
+    """
+    Select random element from given array, remove element when extract
+
+    Args: 
+        array: array of raw data
+        num: number of element need to be extract from array
+
+    Returns:
+        result: array of extracted data
+        array: the origional array after extract data
+    """
+
+    # Set random seed
     np.random.seed(12345)
     random.seed(12345)
+
+    # Check if extracting y_lable
     isY = len(array.shape)
+
+    # Create framework of result
     index = random.randint(0, len(array)-1)
     if isY == 1:
         result = [array[index].copy()]
@@ -135,6 +159,8 @@ def getData(array: np.ndarray, num: int):
     else:
         result = [array[index].copy()]
         array = np.delete(array, index, axis=0)
+    
+    # Extract element from origional array
     for i in range(0, num-1):
         index = random.randint(0, len(array)-1)
         if isY == 1:
@@ -143,6 +169,7 @@ def getData(array: np.ndarray, num: int):
         else:
             result = np.append(result, [array[index].copy()], axis=0)
             array = np.delete(array, index, axis=0)
+
     return result, array
 
 
