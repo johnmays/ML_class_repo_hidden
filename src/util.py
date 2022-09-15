@@ -68,9 +68,76 @@ def cv_split(
     if stratified:
         n_zeros, n_ones = count_label_occurrences(y)
 
+    # Copy X and y
+    X = X.copy()
+    y = y.copy()
+    x_tup = ()
+    y_tup = ()
+    # Find fold size
+    foldsize = int(y.size / folds)
+
+    # Split the ndarray randomly into n fold
+    if stratified:
+        X_one = X[np.where(X[-1] == 1)]
+        X_zero = X[np.where(X[-1] == 0)]
+        y_one = y[np.where(y[0] == 1)]
+        y_zero = y[np.where(y[0] == 0)]
+            
+    else:
+        remainder = len(y)%folds
+        for f in range(0, folds-1):
+            if f < remainder:
+                result_x, remain_x = getData(X, foldsize+1)
+                x_tup += (result_x,)
+                X = remain_x
+
+                result_y, remain_y = getData(y, foldsize+1)
+                y_tup += (result_y,)
+                y = remain_y
+            else:
+                result_x, remain_x = getData(X, foldsize)
+                x_tup += (result_x,)
+                X = remain_x
+
+                result_y, remain_y = getData(y, foldsize)
+                y_tup += (result_y,)
+                y = remain_y
+        x_tup += (X,)
+        y_tup += (y,)
+
+    result = ()
+    for a in range(0, folds):
+        result += ((x_tup[0:a]+x_tup[a+1:], y_tup[0:a]+y_tup[a+1:], x_tup[a], y_tup[a]),)
+    return result
+
+
+        
+
     warnings.warn('cv_split is not yet implemented. Simply returning the entire dataset as a single fold...')
 
     return (X, y, X, y),
+
+def getData(array: np.ndarray, num: int):
+    np.random.seed(12345)
+    random.seed(12345)
+    isY = len(array.shape)
+    index = random.randint(0, len(array)-1)
+    if isY == 1:
+        result = [array[index].copy()]
+        array = np.delete(array, index)
+    else:
+        result = [array[index].copy()]
+        array = np.delete(array, index, axis=0)
+    for i in range(0, num-1):
+        index = random.randint(0, len(array)-1)
+        if isY == 1:
+            result = np.append(result, array[index].copy())
+            array = np.delete(array, index)
+        else:
+            result = np.append(result, [array[index].copy()], axis=0)
+            array = np.delete(array, index, axis=0)
+    return result, array
+
 
 
 def accuracy(y: np.ndarray, y_hat: np.ndarray) -> float:
