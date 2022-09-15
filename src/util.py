@@ -29,9 +29,16 @@ def count_label_occurrences(y: np.ndarray) -> Tuple[int, int]:
     return n_zeros, n_ones
 
 
-def entropy():
-    # Implement this on your own!
-    raise NotImplementedError
+def entropy(p_x: np.ndarray):
+    """
+    Returns the Shannon entropy of a variable with the given probability mass values.
+
+    Args:
+        p_x: An array containing a set of probability mass values for a variable.
+
+    Returns: The Shannon entropy of the variable.
+    """
+    return np.sum([p * np.log2(p) for p in p_x])
 
 
 def cv_split(
