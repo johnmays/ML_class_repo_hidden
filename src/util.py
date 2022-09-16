@@ -29,16 +29,111 @@ def count_label_occurrences(y: np.ndarray) -> Tuple[int, int]:
     return n_zeros, n_ones
 
 
-def entropy(p_x: np.ndarray):
+def entropy(y: np.ndarray):
     """
-    Returns the Shannon entropy of a variable with the given probability mass values.
+    Returns the Shannon entropy of a node with a given set of remaining BINARY class labels.
 
     Args:
-        p_x: An array containing a set of probability mass values for a variable.
+        y: A list of class labels for the training examples associated with a node.
+
+    Returns: The Shannon entropy of the node.
+    """
+    n_zeros, n_ones = count_label_occurrences(y)
+    p_zero, p_one = n_zeros / y.size(), n_ones / y.size()
+    return (-p_zero * np.log2(p_zero)) + (-p_one * np.log2(p_one))
+
+
+def entropy_nb(y: np.ndarray):
+    """
+    Returns the Shannon entropy of a variable with the given set of NON-BINARY values.
+
+    Args:
+        y: A list of examples of values for the variable.
 
     Returns: The Shannon entropy of the variable.
     """
-    return np.sum([-p * np.log2(p) for p in p_x])
+    values = {}
+    for val in y:
+        if val in values:
+            values[val] += 1
+        else:
+            values[val] = 1
+    
+    H = 0
+    for val in values:
+        p = values[val] / len(y)
+        H += -p * np.log2(p)
+    return H
+
+
+def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float):
+    """
+    Returns the information gain for partitioning on an attribute, 
+    given a set of training examples and class labels associated with a node.
+
+    Args:
+        X: The values of attributes for the training examples at a node
+        Y: The class labels associated with those examples
+        index: The index of the attribute being partitioned on
+        threshold: The value of the attribute to split by, if the attribute is continuous.
+            Should be None if the index is nominal.
+    
+    Returns: The information gain by partitioning the examples on the given attribute test.
+    """
+
+    H_y = entropy(y) # the entropy of the node before partitioning
+    H_y_given_x = 0 # the entropy of the node after partitioning 
+
+    values_for_attribute = X[:, index]
+    if threshold is None:
+        # Create a dictionary that maps each nominal value to a list of class labels
+        # for examples with that value
+        ex_nominal = {}
+        for i in range(len(y)):
+            if values_for_attribute[i] in ex_nominal:
+                ex_nominal[values_for_attribute[i]].append(y[i])
+            else:
+                ex_nominal[values_for_attribute[i]] = []
+        for v, labels in ex_nominal.items():
+            H_y_given_x += (len(labels) / len(y)) * entropy(labels)
+            
+    else:
+        ex_less_than_equal = []
+        ex_greater_than = []
+        for i in range(len(y)):
+            if values_for_attribute[i] <= threshold:
+                ex_less_than_equal.append(values_for_attribute[i])
+            else:
+                ex_greater_than.append(values_for_attribute[i])
+        H_y_given_x = (len(ex_less_than_equal) * entropy(ex_less_than_equal) / len(y)) + \
+            (len(ex_greater_than) * entropy(ex_greater_than) / len(y))
+        
+    return H_y - H_y_given_x
+
+
+def gain_ratio(X: np.ndarray, y: np.ndarray, index: int, threshold: float):
+    """
+    Returns the gain ratio for partitioning a node with given examples
+    on a given attribute test.
+    
+    Args:
+        X: The values of attributes for the training examples at a node
+        Y: The class labels associated with those examples
+        index: The index of the attribute being partitioned on
+        threshold: The value of the attribute to split by, if the attribute is continuous.
+            Should be None if the index is nominal.
+    
+    Returns: The gain ratio for partitioning the examples on the given attribute test.
+    """
+    ig = information_gain(X, y, index, threshold)
+
+    if threshold is None:
+        branches = X[:, index]
+    else:
+        branches = [(x <= threshold) for x in X[:, index]]
+    H_x = entropy_nb(branches)
+
+    return ig / H_x
 
 
 def cv_split(
