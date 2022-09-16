@@ -29,7 +29,12 @@ def count_label_occurrences(y: np.ndarray) -> Tuple[int, int]:
     return n_zeros, n_ones
 
 
-def entropy(y: np.ndarray):
+def majority_class(y: np.ndarray) -> int:
+    n_zeros, n_ones = count_label_occurrences(y)
+    return 0 if n_zeros > n_ones else 1
+
+
+def entropy(y: np.ndarray) -> float:
     """
     Returns the Shannon entropy of a node with a given set of remaining BINARY class labels.
 
@@ -43,7 +48,7 @@ def entropy(y: np.ndarray):
     return (-p_zero * np.log2(p_zero)) + (-p_one * np.log2(p_one))
 
 
-def entropy_nb(y: np.ndarray):
+def entropy_nb(y: np.ndarray) -> float:
     """
     Returns the Shannon entropy of a variable with the given set of NON-BINARY values.
 
@@ -66,7 +71,7 @@ def entropy_nb(y: np.ndarray):
     return H
 
 
-def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float):
+def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:
     """
     Returns the information gain for partitioning on an attribute, 
     given a set of training examples and class labels associated with a node.
@@ -111,7 +116,7 @@ def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float)
     return H_y - H_y_given_x
 
 
-def gain_ratio(X: np.ndarray, y: np.ndarray, index: int, threshold: float):
+def gain_ratio(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:
     """
     Returns the gain ratio for partitioning a node with given examples
     on a given attribute test.
