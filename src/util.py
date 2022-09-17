@@ -163,17 +163,21 @@ def cv_split(
                 
         # Append the rest of ndarray as the last fold
         tup += ((X,y),)
+        print(tup)
     # Combine the folds into n sets
     result = ()
     for i in range(0, len(tup)):
         test_x = tup[i][0]
         test_y = tup[i][1]
-        train_x = tup[i][0]
-        train_y = tup[i][0]
+
+        train_x = [tup[i][0][0]]
+        temp_x = len(tup[i][0])
+        train_y = [tup[i][1][0]]
+        temp_y = len(tup[i][1])
         for ind, val in enumerate(tup):
             if ind == i:
                 continue
-            train_x = np.concatenate((train_x, val[0].copy()), axis=0)  
+            train_x = np.append(train_x, val[0].copy(), axis=0)  
             train_y = np.append(train_y, val[1].copy())
         train_x = np.delete(train_x, 0, axis=0)
         train_y = np.delete(train_y, 0)
