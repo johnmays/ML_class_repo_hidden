@@ -1,4 +1,6 @@
+from multiprocessing.resource_tracker import getfd
 import random
+from turtle import shape
 import warnings
 from typing import Tuple, Iterable
 
@@ -78,17 +80,25 @@ def cv_split(
     # Copy X and y
     X = X.copy()
     y = y.copy()
-    x_tup = ()
-    y_tup = ()
+    tup = ()
     # Find fold size
     foldsize = int(y.size / folds)
 
     # Split the ndarray randomly into n fold stratified
     if stratified:
-        X_one = X[np.where(X[-1] == 1)]
-        X_zero = X[np.where(X[-1] == 0)]
-        y_one = y[np.where(y[0] == 1)]
-        y_zero = y[np.where(y[0] == 0)]
+        X_one = X[np.where(X[-1] == 1)].copy()
+        X_zero = X[np.where(X[-1] == 0)].copy()
+        y_one = y[np.where(y[0] == 1)].copy()
+        y_zero = y[np.where(y[0] == 0)].copy()
+        foldx = int(len(X_one)/folds)
+        foldy = int(len(y_one)/folds)
+        remainder = len(y)%folds
+        for f in range(0, folds-1):
+            if f < remainder:
+                result_x_one, remain_x_one = getData(X_one, len(X_one)/folds+len(X_one)%folds)
+                resunt_x_zero, remain_x_zero = getData(X_zero, len(X_zero)/folds+len(X_zero)%folds)
+                
+
 
     # Split the ndarray ramdomly into n fold non-stratified        
     else:
@@ -98,29 +108,35 @@ def cv_split(
         for f in range(0, folds-1):
             # If there are remainders then add one extra example to first remainder fold
             if f < remainder:
-                result_x, remain_x = getData(X, foldsize+1)
-                x_tup += (result_x,)
+                result_x, result_y, remain_x, remain_y = getData(X, y, foldsize+1)
+                tup += ((result_x, result_y),)
                 X = remain_x
-
-                result_y, remain_y = getData(y, foldsize+1)
-                y_tup += (result_y,)
                 y = remain_y
+                
             else:
-                result_x, remain_x = getData(X, foldsize)
-                x_tup += (result_x,)
+                result_x, result_y, remain_x, remain_y = getData(X, y, foldsize)
+                tup += ((result_x, result_y),)
                 X = remain_x
-
-                result_y, remain_y = getData(y, foldsize)
-                y_tup += (result_y,)
                 y = remain_y
+                
         # Append the rest of ndarray as the last fold
-        x_tup += (X,)
-        y_tup += (y,)
-
+    tup += ((X,y),)
     # Combine the folds into n sets
     result = ()
-    for a in range(0, folds):
-        result += ((x_tup[0:a]+x_tup[a+1:], y_tup[0:a]+y_tup[a+1:], x_tup[a], y_tup[a]),)
+    for i in range(0, len(tup)):
+        test_x = tup[i][0]
+        test_y = tup[i][1]
+        train_x = tup[i][0]
+        train_y = tup[i][0]
+        for ind, val in enumerate(tup):
+            if ind == i:
+                continue
+            train_x = np.concatenate((train_x, val[0].copy()), axis=0)  
+            train_y = np.append(train_y, val[1].copy())
+        train_x = np.delete(train_x, 0, axis=0)
+        train_y = np.delete(train_y, 0)
+        result += ((train_x, train_y, test_x, test_y),)
+    
     return result
 
 
@@ -131,7 +147,7 @@ def cv_split(
     return (X, y, X, y),
 
 
-def getData(array: np.ndarray, num: int):
+def getData(X: np.ndarray, y:np.ndarray, num: int):
     """
     Select random element from given array, remove element when extract
 
@@ -148,29 +164,24 @@ def getData(array: np.ndarray, num: int):
     np.random.seed(12345)
     random.seed(12345)
 
-    # Check if extracting y_lable
-    isY = len(array.shape)
-
     # Create framework of result
-    index = random.randint(0, len(array)-1)
-    if isY == 1:
-        result = [array[index].copy()]
-        array = np.delete(array, index)
-    else:
-        result = [array[index].copy()]
-        array = np.delete(array, index, axis=0)
+    index = random.randint(0, len(X)-1)
+
+    result_x = np.array([X[index].copy()])
+    result_y = np.array([y[index].copy()])
+    X = np.delete(X, index, axis=0)
+    y = np.delete(y, index)
     
     # Extract element from origional array
     for i in range(0, num-1):
-        index = random.randint(0, len(array)-1)
-        if isY == 1:
-            result = np.append(result, array[index].copy())
-            array = np.delete(array, index)
-        else:
-            result = np.append(result, [array[index].copy()], axis=0)
-            array = np.delete(array, index, axis=0)
+        index = random.randint(0, len(X)-1)
+        result_y = np.append(result_y, y[index].copy())
+        y = np.delete(y, index)
+        
+        result_x = np.append(result_x, [X[index].copy()], axis=0)
+        X = np.delete(X, index, axis=0)
 
-    return result, array
+    return result_x, result_y, X, y
 
 
 
