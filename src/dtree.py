@@ -16,10 +16,16 @@ import util
 class TreeNode():
     def __init__(self) -> None:
         self.children = []
-        self.attribute = None
+
+        # Test Identifiers
+        # If the test is on a nominal attribute, 'nominal_values' gives the node a way to remember
+        # which nominal value (e.g. 'red') is associated with which child.
+        self.attribute_index = 0
+        self.threshold = None
+        self.nominal_values = []
+
         # jkm100 -- probably going to need some way to identify the test <-- here (index, threshold)
         self.leaf_node = True
-        self.partition = None
         self.label = None # jkm100 -- going to need to make this 0,1 at some point - only needed for leaf nodes
 
     @property
@@ -90,7 +96,32 @@ class DecisionTree(Classifier):
 
         Returns: Predictions of shape (n_examples,), either 0 or 1
         """
-        raise NotImplementedError()
+        labels = []
+        for example in X:
+            current_node = self.root
+            while not current_node.leaf_node:
+
+                # Get the test at the current node
+                index = current_node.attribute_index
+                threshold = current_node.threshold
+                
+                # Set current_node to the appropriate child of the current_node
+                if threshold is None:
+                    for i, nv in enumerate(current_node.nominal_values):
+                        if nv == example[index]:
+                            current_node = current_node.children[i]
+                            break
+                else:
+                    if example[index] <= threshold:
+                        current_node = current_node.children[0]
+                    else:
+                        current_node = current_node.children[1]
+            
+            labels.append(current_node.label)
+
+        return np.array(labels)
+            
+
 
     @property
     def schema(self):
