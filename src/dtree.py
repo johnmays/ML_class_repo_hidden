@@ -3,6 +3,7 @@ import os.path
 import warnings
 
 from typing import Optional, List
+from xmlrpc.client import Boolean
 
 import numpy as np
 from sting.classifier import Classifier
@@ -20,7 +21,7 @@ class TreeNode():
         # Test Identifiers
         # If the test is on a nominal attribute, 'nominal_values' gives the node a way to remember
         # which nominal value (e.g. 'red') is associated with which child.
-        self.attribute_index = 0
+        self.attribute_index = None
         self.threshold = None
         self.nominal_values = []
 
@@ -63,33 +64,49 @@ class DecisionTree(Classifier):
         if self.schema == []:
             self._make_majority_classifier(y, self.root)
         else:
-            self._build_tree(X, y, np.copy(self.schema), self.root)
+            self._build_tree(X, y, list(range(self.schema)), self.root)
 
-    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features, current_node):
+    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features, current_node) -> TreeNode:
         """
         Recursive method for considering partitions and building the tree.
 
         Args:
             X: The dataset. The shape is (n_examples, n_features).
             y: The labels. The shape is (n_examples,)
-            possible_features: The subset of the schema's features that are left to choose from at this node.
+            possible_features: The list of the indices of the schema's features that are left to choose from at this node.
             current_node: The TreeNode to be considered for a partition.
         """
-        if possible_features == [] or self._pure_node(y):
-            pass # leave node as is --> leaf node
+        if self._pure_node(y) or possible_features == []:
+            self._make_majority_classifier(y, current_node)
         else: # prepare to partition:
-            best_feature_index = self._determine_split_criterion
+            best_feature_index, best_feature_threshold = self._determine_split_criterion(X, y, possible_features)
             if best_feature_index == None: # ==> Max IG(X) = 0
-                # jkm100 -- need to add: if yes, then make majority classifier w/ TreeNode.label attribute
-                pass
+                self._make_majority_classifier(y, current_node)
             else:
                 # remove feature from possible_features
-                # create children
-                # call on them
-                # REMAINS TO BE IMPLEMENTED
-                pass
+                possible_features_updated = possible_features[:best_feature_index] + possible_features[best_feature_index+1:]
+                current_node.attribute_index = best_feature_index
+                # create children and partition
+                if self.schema[best_feature_index].ftype == Feature.FeatureType.CONTINUOUS:
+                    # Continuous Partition procedure:
+                    current_node.threshold = best_feature_threshold
+                    child_one = TreeNode()
+                    child_two = TreeNode()
+                    current_node.children.append(child_one)
+                    current_node.children.append(child_two)
+                    X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=True)
+                    self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_one)
+                    X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=False)
+                    self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_two)
+                elif self.schema[best_feature_index].ftype == Feature.FeatureType.NOMINAL:
+                    # Nominal Partition procedure:
+                    for value in self.schema[best_feature_index].values:
+                        child = TreeNode()
+                        current_node.children.append(child)
+                        X_partition, Y_partition = self._partition_nominal(X, y, best_feature_index, value)
+                        self._build_tree(X_partition, Y_partition, possible_features_updated, child)
 
-    def _make_majority_classifier(y, node):
+    def _make_majority_classifier(y: np.ndarray, node: TreeNode) -> TreeNode:
         """
         Helper method for turning a node into a majority classifier.
 
@@ -102,6 +119,7 @@ class DecisionTree(Classifier):
             node.label = 1
         else:
             node.label = 0
+        return node
 
     def _pure_node(self, y: np.ndarray):
         """
@@ -119,6 +137,17 @@ class DecisionTree(Classifier):
         else:
             return False
 
+    def _partition_nominal(X: np.ndarray, y: np.ndarray, feature_index, value):
+        """
+        Returns: the subset of X and y corresponding to the partition based upon the nominal value
+        """
+        pass
+
+    def _partition_continuous(X: np.ndarray, y: np.ndarray, feature_index, threshold, leq:Boolean):
+        """
+        Returns: the subset of X and y corresponding to the partition either (greater than) or (less than or equal to) the threshold
+        """
+        pass
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
