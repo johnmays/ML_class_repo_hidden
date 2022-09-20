@@ -186,17 +186,59 @@ def cv_split(
 
     # Split the ndarray randomly into n fold stratified
     if stratified:
-        X_one = X[np.where(X[-1] == 1)].copy()
-        X_zero = X[np.where(X[-1] == 0)].copy()
-        y_one = y[np.where(y[0] == 1)].copy()
-        y_zero = y[np.where(y[0] == 0)].copy()
-        foldx = int(len(X_one)/folds)
-        foldy = int(len(y_one)/folds)
-        remainder = len(y)%folds
+        X_one = X[np.where(y == 1)].copy()
+        X_zero = X[np.where(y == 0)].copy()
+        y_one = y[np.where(y == 1)].copy()
+        y_zero = y[np.where(y == 0)].copy()
+        ones = int(len(X_one)/folds)
+        zeros = int(len(X_zero)/folds)
+        remainder_one = len(X_one)%folds
+        remainder_zero = len(X_zero)%folds
         for f in range(0, folds-1):
-            if f < remainder:
-                result_x_one, remain_x_one = getData(X_one, len(X_one)/folds+len(X_one)%folds)
-                resunt_x_zero, remain_x_zero = getData(X_zero, len(X_zero)/folds+len(X_zero)%folds)
+            if f < remainder_one:
+                result_x_one, result_y_one, remain_x_one, remain_y_one = getData(X_one, y_one, ones+1)
+            else:
+                result_x_one, result_y_one, remain_x_one, remain_y_one = getData(X_one, y_one, ones)
+            if f < remainder_zero:
+                result_x_zero, result_y_zero, remain_x_zero, remain_y_zero = getData(X_zero, y_zero, zeros+1)
+            else:
+                result_x_zero, result_y_zero, remain_x_zero, remain_y_zero = getData(X_zero, y_zero, zeros)
+            
+            if len(result_x_one) == 0:
+                result_x = result_x_zero
+            elif len(result_x_zero) == 0:
+                result_x = result_x_one
+            else:
+                result_x = np.append(result_x_one, result_x_zero, axis=0)
+
+            if len(result_y_one) == 0:
+                result_y = result_y_zero
+            elif len(result_y_zero) == 0:
+                result_y = result_y_one
+            else:
+                result_y = np.append(result_y_one, result_y_zero)
+
+
+            tup += ((result_x, result_y),)
+            X_one = remain_x_one
+            X_zero = remain_x_zero
+            y_one = remain_y_one
+            y_zero = remain_y_zero
+        if len(X_one) == 0:
+            result_x = X_zero
+        elif len(X_zero) == 0:
+            result_x = X_one
+        else:
+            result_x = np.append(X_one, X_zero, axis=0)
+
+        if len(y_one) == 0:
+            result_y = y_zero
+        elif len(y_zero) == 0:
+            result_y = y_one
+        else:
+            result_y = np.append(y_one, y_zero)
+        tup += ((result_x, result_y),)
+        print(tup)
                 
 
 
@@ -220,18 +262,22 @@ def cv_split(
                 y = remain_y
                 
         # Append the rest of ndarray as the last fold
-    tup += ((X,y),)
+        tup += ((X,y),)
+        print(tup)
     # Combine the folds into n sets
     result = ()
     for i in range(0, len(tup)):
         test_x = tup[i][0]
         test_y = tup[i][1]
-        train_x = tup[i][0]
-        train_y = tup[i][0]
+
+        train_x = [tup[i][0][0]]
+        temp_x = len(tup[i][0])
+        train_y = [tup[i][1][0]]
+        temp_y = len(tup[i][1])
         for ind, val in enumerate(tup):
             if ind == i:
                 continue
-            train_x = np.concatenate((train_x, val[0].copy()), axis=0)  
+            train_x = np.append(train_x, val[0].copy(), axis=0)  
             train_y = np.append(train_y, val[1].copy())
         train_x = np.delete(train_x, 0, axis=0)
         train_y = np.delete(train_y, 0)
@@ -259,7 +305,8 @@ def getData(X: np.ndarray, y:np.ndarray, num: int):
         result: array of extracted data
         array: the origional array after extract data
     """
-
+    if num == 0:
+        return X, y, [], []
     # Set random seed
     np.random.seed(12345)
     random.seed(12345)
