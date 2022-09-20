@@ -60,10 +60,21 @@ class DecisionTree(Classifier):
             y: The labels. The shape is (n_examples,)
             weights: Weights for each example. Will become relevant later in the course, ignore for now.
         """
-        # jkm100 -- need to add condition here: no features? if yes, then make majority classifier w/ TreeNode.label attribute
-        self._build_tree(X, y, np.copy(self.schema), self.root)
+        if self.schema == []:
+            self._make_majority_classifier(y, self.root)
+        else:
+            self._build_tree(X, y, np.copy(self.schema), self.root)
 
     def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features, current_node):
+        """
+        Recursive method for considering partitions and building the tree.
+
+        Args:
+            X: The dataset. The shape is (n_examples, n_features).
+            y: The labels. The shape is (n_examples,)
+            possible_features: The subset of the schema's features that are left to choose from at this node.
+            current_node: The TreeNode to be considered for a partition.
+        """
         if possible_features == [] or self._pure_node(y):
             pass # leave node as is --> leaf node
         else: # prepare to partition:
@@ -78,7 +89,29 @@ class DecisionTree(Classifier):
                 # REMAINS TO BE IMPLEMENTED
                 pass
 
+    def _make_majority_classifier(y, node):
+        """
+        Helper method for turning a node into a majority classifier.
+
+        Args:
+            y: The labels. The shape is (n_examples,)
+            node: The TreeNode that will be turned into a simple majority classifier.
+        """
+        n_zero, n_one = util.count_label_occurrences(y)
+        if n_one > n_zero:
+            node.label = 1
+        else:
+            node.label = 0
+
     def _pure_node(self, y: np.ndarray):
+        """
+        Helper method for determining if a node is pure.
+
+        Args:
+            y: The labels. The shape is (n_examples,)
+
+        Returns: boolean that is true if (every label in y is 1) or (every label in y is 0)
+        """
         norm = np.linalg.norm(y, ord=1)
         size = np.size(y)
         if norm == size or norm == 0:
@@ -119,9 +152,7 @@ class DecisionTree(Classifier):
             
             labels.append(current_node.label)
 
-        return np.array(labels)
-            
-
+        return np.array(labels)     
 
     @property
     def schema(self):
@@ -130,7 +161,6 @@ class DecisionTree(Classifier):
         """
         return self._schema
 
-    # It is standard practice to prepend helper methods with an underscore "_" to mark them as protected.
     def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray) -> int:
         """
         Determine decision tree split criterion. This is just an example to encourage you to use helper methods.
