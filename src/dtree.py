@@ -136,17 +136,32 @@ class DecisionTree(Classifier):
         else:
             return False
 
-    def _partition_nominal(X: np.ndarray, y: np.ndarray, feature_index, value):
+    def _partition_nominal(X: np.ndarray, y: np.ndarray, feature_index, value) -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns: the subset of X and y corresponding to the partition based upon the nominal value
         """
-        pass
+        X_partitioned = []
+        y_partitioned = []
+        for example, label in zip(X,y):
+            if example[feature_index] == value:
+                X_partitioned.append(example)
+                y_partitioned.append(label)
+        return X_partitioned, y_partitioned
 
     def _partition_continuous(X: np.ndarray, y: np.ndarray, feature_index, threshold, leq:Boolean):
         """
         Returns: the subset of X and y corresponding to the partition either (greater than) or (less than or equal to) the threshold
         """
-        pass
+        X_partitioned = []
+        y_partitioned = []
+        for example, label in zip(X,y):
+            if leq and example[feature_index] <= threshold:
+                X_partitioned.append(example)
+                y_partitioned.append(label)
+            elif not leq and example[feature_index] > threshold:
+                X_partitioned.append(example)
+                y_partitioned.append(label)
+        return X_partitioned, y_partitioned
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
