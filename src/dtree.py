@@ -16,30 +16,25 @@ import util
 class TreeNode():
     def __init__(self) -> None:
         self.children = []
-        self.attribute = None
-        # jkm100 -- probably going to need some way to identify the test <-- here
-        self._leaf_node = True
-        self.partition = None
-        self.label = None # jkm100 -- going to need to make this 0,1 at some point - only needed for leaft nodes
+
+        # Test Identifiers
+        # If the test is on a nominal attribute, 'nominal_values' gives the node a way to remember
+        # which nominal value (e.g. 'red') is associated with which child.
+        self.attribute_index = 0
+        self.threshold = None
+        self.nominal_values = []
+
+        # jkm100 -- probably going to need some way to identify the test <-- here (index, threshold)
+        self.leaf_node = True
+        self.label = None # jkm100 -- going to need to make this 0,1 at some point - only needed for leaf nodes
 
     @property
-    def _leaf_node(self):
-        return self._leaf_node
-
-    @_leaf_node.setter
-    def _leaf_node(self):
+    def leaf_node(self):
         if self.children == []:
-            self._leaf_node = True
+            self.leaf_node = True
         else:
-            self._leaf_node = False
-    
-    @_leaf_node.getter
-    def _leaf_node(self):
-        return self._leaf_node
-
-    
-
-        
+            self.leaf_node = False
+        return self.leaf_node
 
 class DecisionTree(Classifier):
     def __init__(self, schema: List[Feature], tree_depth_limit=0, use_information_gain=True):
@@ -49,9 +44,6 @@ class DecisionTree(Classifier):
         to use all the good programming skills you learned in 132 and utilize numpy optimizations wherever possible.
         Good luck!
         """
-
-        warnings.warn('The DecisionTree class is currently running dummy Majority Classifier code. ' +
-                      'Once you start implementing your decision tree delete this warning message.')
 
         self._schema = schema  # For some models (like a decision tree) it makes sense to keep track of the data schema
         self._majority_label = 0  # Protected attributes in Python have an underscore prefix
@@ -68,21 +60,32 @@ class DecisionTree(Classifier):
             y: The labels. The shape is (n_examples,)
             weights: Weights for each example. Will become relevant later in the course, ignore for now.
         """
+        # jkm100 -- need to add condition here: no features? if yes, then make majority classifier w/ TreeNode.label attribute
+        self._build_tree(X, y, np.copy(self.schema), self.root)
 
-        # In Java, it is best practice to LBYL (Look Before You Leap), i.e. check to see if code will throw an exception
-        # BEFORE running it. In Python, the dominant paradigm is EAFP (Easier to Ask Forgiveness than Permission), where
-        # try/except blocks (like try/catch blocks) are commonly used to catch expected exceptions and deal with them.
-        try:
-            split_criterion = self._determine_split_criterion(X, y)
-        except NotImplementedError:
-            warnings.warn('This is for demonstration purposes only.')
+    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features, current_node):
+        if possible_features == [] or self._pure_node(y):
+            pass # leave node as is --> leaf node
+        else: # prepare to partition:
+            best_feature_index = self._determine_split_criterion
+            if best_feature_index == None: # ==> Max IG(X) = 0
+                # jkm100 -- need to add: if yes, then make majority classifier w/ TreeNode.label attribute
+                pass
+            else:
+                # remove feature from possible_features
+                # create children
+                # call on them
+                # REMAINS TO BE IMPLEMENTED
+                pass
 
-        n_zero, n_one = util.count_label_occurrences(y)
-
-        if n_one > n_zero:
-            self._majority_label = 1
+    def _pure_node(self, y: np.ndarray):
+        norm = np.linalg.norm(y, ord=1)
+        size = np.size(y)
+        if norm == size or norm == 0:
+            return True # then node is pure
         else:
-            self._majority_label = 0
+            return False
+
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -93,11 +96,33 @@ class DecisionTree(Classifier):
 
         Returns: Predictions of shape (n_examples,), either 0 or 1
         """
+        labels = []
+        for example in X:
+            current_node = self.root
+            while not current_node.leaf_node:
 
-        # Returns either all 1s or all 0s, depending on _majority_label.
-        return np.ones(X.shape[0], dtype=np.int) * self._majority_label
+                # Get the test at the current node
+                index = current_node.attribute_index
+                threshold = current_node.threshold
+                
+                # Set current_node to the appropriate child of the current_node
+                if threshold is None:
+                    for i, nv in enumerate(current_node.nominal_values):
+                        if nv == example[index]:
+                            current_node = current_node.children[i]
+                            break
+                else:
+                    if example[index] <= threshold:
+                        current_node = current_node.children[0]
+                    else:
+                        current_node = current_node.children[1]
+            
+            labels.append(current_node.label)
 
-    # In Python, instead of getters and setters we have properties: docs.python.org/3/library/functions.html#property
+        return np.array(labels)
+            
+
+
     @property
     def schema(self):
         """
@@ -106,12 +131,31 @@ class DecisionTree(Classifier):
         return self._schema
 
     # It is standard practice to prepend helper methods with an underscore "_" to mark them as protected.
-    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray):
+    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray) -> int:
         """
         Determine decision tree split criterion. This is just an example to encourage you to use helper methods.
         Implement this however you like!
         """
-        raise NotImplementedError()
+        max_information_measure = 0
+        best_feature_index = None
+        for index in range(possible_features.shape()[0]):
+            if possible_features[index].ftype == Feature.FeatureType.CONTINUOUS:
+                # helper function that finds all possible thresholds
+                # pass over all possible thresholds
+                # NOT YET IMPLEMENTED
+                pass
+            else:
+                if self.use_information_gain:
+                    current_IG = util.information_gain(X, y, index, None)
+                    if current_IG > max_information_measure:
+                        max_information_measure = current_IG
+                        best_feature_index = index
+                else:
+                    current_GR = util.gain_ratio(X, y, index, None)
+                    if current_GR > max_information_measure:
+                        max_information_measure = current_GR
+                        best_feature_index = index
+        return best_feature_index
 
 
 def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray):
@@ -147,6 +191,8 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
     file_base = path[-1]  # -1 accesses the last entry of an iterable in Python
     root_dir = os.sep.join(path[:-1])
     schema, X, y = parse_c45(file_base, root_dir)
+
+    # print(schema)
 
     if use_cross_validation:
         datasets = util.cv_split(X, y, folds=5, stratified=True)
