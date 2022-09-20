@@ -2,8 +2,7 @@ import argparse
 import os.path
 import warnings
 
-from typing import Optional, List
-from xmlrpc.client import Boolean
+from typing import Boolean, Optional, List, Tuple
 
 import numpy as np
 from sting.classifier import Classifier
@@ -190,19 +189,33 @@ class DecisionTree(Classifier):
         """
         return self._schema
 
-    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray) -> int:
+    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray, possible_features: np.ndarray) -> Tuple[int, float]:
         """
         Determine decision tree split criterion. This is just an example to encourage you to use helper methods.
         Implement this however you like!
         """
         max_information_measure = 0
         best_feature_index = None
-        for index in range(possible_features.shape()[0]):
-            if possible_features[index].ftype == Feature.FeatureType.CONTINUOUS:
+        best_threshold = None
+
+        for index in possible_features:
+            if self._schema[index].ftype == Feature.FeatureType.CONTINUOUS:
                 # helper function that finds all possible thresholds
-                # pass over all possible thresholds
-                # NOT YET IMPLEMENTED
-                pass
+                dividers = self._find_dividers(X[:, index], y)
+                for div in dividers:
+                    if self.use_information_gain:
+                        current_IG = util.information_gain(X, y, index, div)
+                        if current_IG > max_information_measure:
+                            max_information_measure = current_IG
+                            best_feature_index = index
+                            best_threshold = div
+                    else:
+                        current_GR = util.gain_ratio(X, y, index, div)
+                        if current_GR > max_information_measure:
+                            max_information_measure = current_GR
+                            best_feature_index = index
+                            best_threshold = div
+
             else:
                 if self.use_information_gain:
                     current_IG = util.information_gain(X, y, index, None)
@@ -214,7 +227,21 @@ class DecisionTree(Classifier):
                     if current_GR > max_information_measure:
                         max_information_measure = current_GR
                         best_feature_index = index
-        return best_feature_index
+        
+        return best_feature_index, best_threshold
+
+
+    def _find_dividers(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        values_sort = [[v, l] for v, l in zip(values, labels)]
+        values_sort = sorted(values_sort, key=lambda x: x[0])
+
+        dividers = [values_sort[0][0] - 0.01]
+        for i in range(1, len(labels)):
+            if values_sort[i][1] != values_sort[i-1][1]:
+                dividers.append((values_sort[i][0] + values_sort[i-1][0]) / 2)
+        dividers.append(values_sort[-1][0] + 0.01)
+        
+        return np.array(dividers)
 
 
 def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray):
