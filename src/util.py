@@ -15,18 +15,14 @@ Make sure you read the instruction clearly to know whether you have to implement
 
 def count_label_occurrences(y: np.ndarray) -> Tuple[int, int]:
     """
-    This is a simple example of a helpful helper method you may decide to implement. Simply takes an array of labels and
-    counts the number of positive and negative labels.
-
-    HINT: Maybe a method like this is useful for calculating more complicated things like entropy!
+    This method simply takes an array of labels and counts the number of positive and negative labels.
 
     Args:
         y: Array of binary labels.
 
     Returns: A tuple containing the number of negative occurrences, and number of positive occurences, respectively.
-
     """
-    n_ones = (y == 1).sum()  # How does this work? What does (y == 1) return?
+    n_ones = (y == 1).sum()
     n_zeros = y.size - n_ones
     return n_zeros, n_ones
 

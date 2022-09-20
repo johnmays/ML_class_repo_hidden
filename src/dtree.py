@@ -24,9 +24,9 @@ class TreeNode():
         self.threshold = None
         self.nominal_values = []
 
-        # jkm100 -- probably going to need some way to identify the test <-- here (index, threshold)
+        # If leaf_node property is true, this node will be given a label
         self.leaf_node = True
-        self.label = None # jkm100 -- going to need to make this 0,1 at some point - only needed for leaf nodes
+        self.label = None
 
     @property
     def leaf_node(self):
