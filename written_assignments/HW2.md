@@ -6,6 +6,24 @@ Answer:
 8.	(i) Give an example of a nontrivial (nonconstant) Boolean function over $3$ Boolean attributes where IG(X) would return zero for *all* attributes at the root. (ii) Explain the significance of this observation, given your answer to Q7. (iii) Estimate how many such functions could exist over $n$ attributes, as a function of $n$. (20 points)
 
 Answer:
+(i) An example of one such indecisive Boolean function is:
+| Condition | $y$ |
+| ----- | ----- |
+| $A$ & $B$ & $C$ | 0 |
+| $A$ & $B$ & $\neg C$ | 1 |
+| $A$ & $\neg B$ & $C$ | 1 |
+| $A$ & $\neg B$ & $\neg C$ | 0 |
+| $\neg A$ & $B$ & $C$ | 0 |
+| $\neg A$ & $B$ & $\neg C$ | 1 |
+| $\neg A$ & $\neg B$ & $C$ | 1 |
+| $\neg A$ & $\neg B$ & $\neg C$ | 0 |
+
+The entropy of the original distribution is ${1 \over 2} \log{_2}{0.5} + {1 \over 2} \log{_2}{0.5} = 1$.
+
+If you partition on $A$, both resulting 'child' partitions have their own 50-50 distribution. (The first four rows, with $A = True$, have two zeroes and two ones; the last four rows, with $A = false$, have two zeroes and two ones.) So, the entropy after partitioning on A is ${1 \over 2}({1 \over 2} \log{_2}{0.5} + {1 \over 2} \log{_2}{0.5}) + {1 \over 2}({1 \over 2} \log{_2}{0.5} + {1 \over 2} \log{_2}{0.5}) = 1$.
+
+Similarly, partitioning on $B$ and $C$ result in 50-50 distributions, so they both have entropies of 1 as well. If partitioning on all attributes results in the same entropy as the original distribution, then all attributes have no information gain.
+
  
 9.	Show that for a continuous attribute X, the only split values we need to check to determine a split with max IG(X) lie between points with different labels. (Hint: consider the following setting for X: there is a candidate split point $S$ in the middle of $N$ examples with the same label. To the left of $S$ are $n$ such examples. To the left of $N$, there are $L0$ examples with label negative and the rest positive, and likewise $(M0, M1)$ to the right. Express the information gain of $S$ as a function of $n$. Then show that this function is maximized either when $n=0$ or $n=N$ with all else constant.) (20 points)
 
