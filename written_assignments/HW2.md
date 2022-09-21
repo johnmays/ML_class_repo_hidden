@@ -9,19 +9,25 @@ Proving that the number of unique hypotheses (i.e. the number of Boolean functio
 | ----- | ----- | ----- | ----- |
 |  |  |  | No |
 |  |  | X | No |
-|  | X | X | No |
+|  | X |  | No |
 |  | X | X | No |
 | X |  |  | No |
 | X |  | X | No |
 | X | X |  | Yes |
-| X | X |  | Yes |
+| X | X | X | Yes |
 
 All in all, there are $2^n$ possible cominations of attribute values, and we have to map each combination to one of 2 values. So, the number of unique hypotheses is $2^{number of combinations}$, or $2^{2^n}$.
 
-Call the set of $2^{2^n}$ hypotheses $S$, and say that a decision tree 'corresponds' to a hypothesis if they have the same mapping of attribute values to class labels. We'll first show that the set of decision trees is surjective onto the set of unique hypotheses. For any hypothesis, it's possible to create a decision tree that corresponds with it. Consider a hypothesis $H$ that concerns $n$ Boolean attributes:
-- Create a full binary decision tree, such that all nodes at the $i$th level partition on the $i$th attribute.
-  - Each distinct path from the root to a leaf node must represent a distinct combination of attributes, as it forked from all other paths at at least one node.
-  - Every possible combination of attributes must be present
+Call the set of $2^{2^n}$ hypotheses $S$, and say that a decision tree 'corresponds' to a hypothesis if they have the same mapping of attribute values to class labels. We'll first show that the set of distinct decision trees is surjective onto the set of unique hypotheses. For any hypothesis, it's possible to create a decision tree that corresponds with it. Consider a hypothesis $H$ that concerns $n$ Boolean attributes:
+- Create a full binary decision tree of depth $n$, such that all nodes at the $i^{th}$ level partition between True and False on the $i^{th}$ attribute.
+  - Every possible combination of attributes must be present; by the construction of the tree, no matter what combination of values (branches) you choose, there is a matching path to a leaf node.
+- Each leaf node represents a unique combination of attribute values. So, for each leaf node, classify examples based on the matching combination of values according to the hypothesis.
+
+This tree would map every combination of attributes to a class label in perfect agreement with $H$. Since, for every hypothesis, there is a corresponding distinct decision tree that represents it, the set of distinct decision trees is surjective onto the set of hypotheses.
+
+The set of distinct decision trees is also injective onto the set of unique hypotheses. This is a relatively trivial point to make-- if two decision trees both mapped to the same hypothesis, then by definition of 'distinct', one of them could be considered a 'non-distinct' copy of the other. Therefore, there can definitionally be only one distinct decision tree for each hypothesis.
+
+Since the set of distinct decision trees is both surjective and injective onto the set of hypotheses (i.e. Boolean functions), the two sets must have the same size; since the size of the set of unique hypotheses is $2^{2^n}$, the size of the set of distinct decision trees must also be $2^{2^n}$.
 
 8.	(i) Give an example of a nontrivial (nonconstant) Boolean function over $3$ Boolean attributes where IG(X) would return zero for *all* attributes at the root. (ii) Explain the significance of this observation, given your answer to Q7. (iii) Estimate how many such functions could exist over $n$ attributes, as a function of $n$. (20 points)
 
