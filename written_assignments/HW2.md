@@ -3,6 +3,26 @@
 
 Answer: 
 
+Proving that the number of unique hypotheses (i.e. the number of Boolean functions) is $2^{2^n}$ is straightforward. A hypothesis maps every combination of attribute values to a predicted class label. For instance, the following table might describe a hypothesis about classifying whales:
+
+| Fish? | Big? | Blue? | Is it a whale? |
+| ----- | ----- | ----- | ----- |
+|  |  |  | No |
+|  |  | X | No |
+|  | X | X | No |
+|  | X | X | No |
+| X |  |  | No |
+| X |  | X | No |
+| X | X |  | Yes |
+| X | X |  | Yes |
+
+All in all, there are $2^n$ possible cominations of attribute values, and we have to map each combination to one of 2 values. So, the number of unique hypotheses is $2^{number of combinations}$, or $2^{2^n}$.
+
+Call the set of $2^{2^n}$ hypotheses $S$, and say that a decision tree 'corresponds' to a hypothesis if they have the same mapping of attribute values to class labels. We'll first show that the set of decision trees is surjective onto the set of unique hypotheses. For any hypothesis, it's possible to create a decision tree that corresponds with it. Consider a hypothesis $H$ that concerns $n$ Boolean attributes:
+- Create a full binary decision tree, such that all nodes at the $i$th level partition on the $i$th attribute.
+  - Each distinct path from the root to a leaf node must represent a distinct combination of attributes, as it forked from all other paths at at least one node.
+  - Every possible combination of attributes must be present
+
 8.	(i) Give an example of a nontrivial (nonconstant) Boolean function over $3$ Boolean attributes where IG(X) would return zero for *all* attributes at the root. (ii) Explain the significance of this observation, given your answer to Q7. (iii) Estimate how many such functions could exist over $n$ attributes, as a function of $n$. (20 points)
 
 Answer:
