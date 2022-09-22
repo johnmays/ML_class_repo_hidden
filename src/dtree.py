@@ -11,22 +11,21 @@ from sting.data import Feature, FeatureType, parse_c45
 
 import util
 
-# In Python, the convention for class names is CamelCase, just like Java! However, the convention for method and
-# variable names is lowercase_separated_by_underscores, unlike Java.
-
 class TreeNode():
     def __init__(self) -> None:
-        self.children = []
-
-        # Test Identifiers
-        # If the test is on a nominal attribute, 'nominal_values' gives the node a way to remember
-        # which nominal value (e.g. 'red') is associated with which child.
+        """
+        This is the data structure for the tree that will make the classifier.
+        It contains information about the test it runs, its children, and if it is a leaf node, the label it will give to examples.
+        """
+        # Test Identifiers:
         self.attribute_index = None
         self.threshold = None
-        self.nominal_values = []
+        self.nominal_values = [] # Should populate in the same order as self.children
 
-        # If leaf_node property is true, this node will be given a label
+        # will be set to 0 or 1 if self.leaf_node is true
         self.label = None
+
+        self.children = []
 
     @property
     def leaf_node(self):
@@ -35,17 +34,12 @@ class TreeNode():
 class DecisionTree(Classifier):
     def __init__(self, schema: List[Feature], tree_depth_limit=0, use_information_gain=True):
         """
-        This is the class where you will implement your decision tree. At the moment, we have provided some dummy code
-        where this is simply a majority classifier in order to give you an idea of how the interface works. Don't forget
-        to use all the good programming skills you learned in 132 and utilize numpy optimizations wherever possible.
-        Good luck!
+        This class handles the DecisionTree.  It has methods for building the tree (fit()), and a method for predicting on new examples.
         """
-
-        self._schema = schema  # For some models (like a decision tree) it makes sense to keep track of the data schema
-        self._majority_label = 0  # Protected attributes in Python have an underscore prefix
+        self._schema = schema  # A set of features with their properties
         self.tree_depth_limit = tree_depth_limit
         self.use_information_gain = use_information_gain
-        self.root = TreeNode()
+        self.root = TreeNode() # beginning with a default TreeNode as the root
         self.size = 1
 
     def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None) -> None:
@@ -63,63 +57,60 @@ class DecisionTree(Classifier):
         else:
             self._build_tree(X, y, list(range(len(self.schema))), self.root, 0)
 
-    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features: List, current_node: TreeNode, depth: int) -> TreeNode:
+    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int) -> TreeNode:
         """
         Recursive method for considering partitions and building the tree.
+        Made after the ID3 algorithm.
 
         Args:
             X: The dataset. The shape is (n_examples, n_features).
             y: The labels. The shape is (n_examples,)
-            possible_features: The list of the indices of the schema's features that are left to choose from at this node.
+            possible_attributes: The list of the indices of the schema's features that are left to choose from at this node.
             current_node: The TreeNode to be considered for a partition.
+            depth: a measure of how deep current_node is in the tree
         """
-        if self._pure_node(y):
-            print("PURE NODE")
-        if possible_features == []:
-            print("NO MORE FEATURES")
-        if depth == self.tree_depth_limit:
-            print("I'M AT MY LIMIT")
 
         print(f"Shape: {np.shape(X)}")
         print(y)
 
-        if self._pure_node(y) or possible_features == [] or depth == self.tree_depth_limit:
+        if self._pure_node(y) or possible_attributes == [] or depth == self.tree_depth_limit:
             self._make_majority_classifier(y, current_node)
         else: # prepare to partition:
-            best_feature_index, best_feature_threshold = self._determine_split_criterion(X, y, possible_features)
-            if best_feature_index == None: # ==> Max IG(X) = 0
-                print("NO GOOD")
+            best_attribute_index, best_attribute_threshold = self._determine_split_criterion(X, y, possible_attributes)
+            if best_attribute_index == None: # ==> Max IG(X) = 0
                 self._make_majority_classifier(y, current_node)
             else:
-                # remove feature from possible_features
-                possible_features_updated = possible_features[:best_feature_index] + possible_features[best_feature_index+1:]
-                current_node.attribute_index = best_feature_index
+                # remove feature from possible_attributes
+                possible_attributes_updated = possible_attributes[:best_attribute_index] + possible_attributes[best_attribute_index+1:]
+                current_node.attribute_index = best_attribute_index
                 # create children and partition
-                if self.schema[best_feature_index].ftype == FeatureType.CONTINUOUS:
+                if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
                     # Continuous Partition procedure:
-                    print("Committing continuous node with attribute " + self.schema[best_feature_index].name + ", value " + str(best_feature_threshold) + " at depth " + str(depth))
-                    current_node.threshold = best_feature_threshold
+                    print("Committing continuous node with attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth " + str(depth))
+
+                    current_node.threshold = best_attribute_threshold
 
                     child_one, child_two = TreeNode(), TreeNode()
                     current_node.children.extend([child_one, child_two])
                     self.size += 2
                     
-                    X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=True)
-                    self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_one, depth+1)
-                    X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=False)
-                    self._build_tree(X_partition_g, Y_partition_g, possible_features_updated, child_two, depth+1)
-                
-                elif self.schema[best_feature_index].ftype == FeatureType.NOMINAL:
+                    # Partitioning for less than or equal to the threshold
+                    X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=True)
+                    self._build_tree(X_partition_leq, Y_partition_leq, possible_attributes_updated, child_one, depth+1)
+                    # Partitioning for greater than the threshold
+                    X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=False)
+                    self._build_tree(X_partition_g, Y_partition_g, possible_attributes_updated, child_two, depth+1)
+                else: 
                     # Nominal Partition procedure:
-                    print("Committing nominal node with attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
-                    for value in self.schema[best_feature_index].values:
+                    print("Committing nominal node with attribute " + self.schema[best_attribute_index].name + " at depth " + str(depth))
+                    for value in self.schema[best_attribute_index].values:
                         child = TreeNode()
                         current_node.nominal_values.append(value)
                         current_node.children.append(child)
                         self.size += 1
                         
-                        X_partition, Y_partition = self._partition_nominal(X, y, best_feature_index, value)
-                        self._build_tree(X_partition, Y_partition, possible_features_updated, child, depth+1)
+                        X_partition, Y_partition = self._partition_nominal(X, y, best_attribute_index, value)
+                        self._build_tree(X_partition, Y_partition, possible_attributes_updated, child, depth+1)
 
     def _make_majority_classifier(self, y: np.ndarray, node: TreeNode) -> TreeNode:
         """
@@ -147,13 +138,21 @@ class DecisionTree(Classifier):
         """
         n_zeros, n_ones = util.count_label_occurrences(y)
         size = np.size(y)
-        if n_zeros == size or n_ones == 0:
-            return True # then node is pure
+        if n_zeros == size or n_ones == 0: # then node is pure
+            return True
         else:
             return False
 
     def _partition_nominal(self, X: np.ndarray, y: np.ndarray, feature_index, value) -> Tuple[np.ndarray, np.ndarray]:
         """
+        A method for partitioning a subset of training data
+
+        Args:
+            X: A subset of the examples in the dataset that the returned partition will be nondestructively taken from. Shape is (n_examples, n_features).
+            y: A corresponding subset of the labels in the dataset that the returned partition will be nondestructively taken from. Shape is (n_examples, ).
+            feature_index: The (row) index of X where X's measure of a specific nominal attribute lie.
+            value: the value of the nominal attribute that positively determines partition memmbership,
+
         Returns: the subset of X and y corresponding to the partition based upon the nominal value
         """
         X_partitioned = []
@@ -166,6 +165,16 @@ class DecisionTree(Classifier):
 
     def _partition_continuous(self, X: np.ndarray, y: np.ndarray, feature_index, threshold, leq: bool):
         """
+        A method for partitioning a subset of training data
+
+        Args:
+            X: A subset of the examples in the dataset that the returned partition will be nondestructively taken from. Shape is (n_examples, n_features).
+            y: A corresponding subset of the labels in the dataset that the returned partition will be nondestructively taken from. Shape is (n_examples, ).
+            feature_index: The (row) index of X where X's measure of a specific nominal attribute lie.
+            threshold: the value of the continous attribute that X & y will be partitioned by.
+            leq: True  ==> partition will contain all examples less than or equal to the threshold.
+                False ==> partition will contain all examples greater than the threshold.
+
         Returns: the subset of X and y corresponding to the partition either (greater than) or (less than or equal to) the threshold
         """
         X_partitioned = []
@@ -181,7 +190,7 @@ class DecisionTree(Classifier):
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
-        This is the method where the decision tree is evaluated.
+        This method uses the decision tree to label a set of examples, X.
 
         Args:
             X: The testing data of shape (n_examples, n_features).
@@ -220,22 +229,26 @@ class DecisionTree(Classifier):
         """
         return self._schema
 
-    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray, possible_features: np.ndarray) -> Tuple[int, float]:
+    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray, possible_attributes: np.ndarray) -> Tuple[int, float]:
         """
-        Determine decision tree split criterion. This is just an example to encourage you to use helper methods.
-        Implement this however you like!
+        Args:
+            X: The dataset. The shape is (n_examples, n_features).
+            y: The labels. The shape is (n_examples,)
+            possible_attributes: The list of the indices of the schema's features that are left to choose from at this node.
+
+        Returns: best_attribute_index, the schema index of the best possible attribute by the given metric, and best_threshold, a corresponding threshold value for that attribute if it is continuous (= None otherwise).
         """
         max_information_measure = 0
-        best_feature_index = None
+        best_attribute_index = None
         best_threshold = None
 
         H_y = util.entropy(y)
 
-        for index in possible_features:
+        for index in possible_attributes:
             feature = self._schema[index]
             if feature.ftype == FeatureType.CONTINUOUS:
                 # helper function that finds all possible thresholds
-                dividers = self._find_dividers_jank(X[:, index], y)
+                dividers = self._find_thresholds(X[:, index], y)
                 
                 b = 0
 
@@ -244,7 +257,7 @@ class DecisionTree(Classifier):
                         current_IG = H_y - util.conditional_entropy(X, y, index, div)
                         if current_IG > max_information_measure:
                             max_information_measure = current_IG
-                            best_feature_index = index
+                            best_attribute_index = index
                             best_threshold = div
                         if current_IG > b:
                             b = current_IG
@@ -252,7 +265,7 @@ class DecisionTree(Classifier):
                         current_GR = (H_y - util.conditional_entropy(X, y, index, div)) / util.attribute_entropy(X, index, div)
                         if current_GR > max_information_measure:
                             max_information_measure = current_GR
-                            best_feature_index = index
+                            best_attribute_index = index
                             best_threshold = div
                         if current_GR > b:
                             b = current_GR
@@ -268,22 +281,28 @@ class DecisionTree(Classifier):
                     print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}")
                     if current_IG > max_information_measure:
                         max_information_measure = current_IG
-                        best_feature_index = index
+                        best_attribute_index = index
                 else:
                     current_GR = (H_y - util.conditional_entropy(X, y, index, None)) / util.attribute_entropy(X, index, None)
                     print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}")
                     if current_GR > max_information_measure:
                         max_information_measure = current_GR
-                        best_feature_index = index
+                        best_attribute_index = index
         
-        return best_feature_index, best_threshold
+        return best_attribute_index, best_threshold
 
-
-    def _find_dividers_jank(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+    def _find_thresholds(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        """
+        NOT YET DOCUMENTED
+        This method returns the points for a continuous attribute that could be possible thresholds.
+        """
         return np.unique(values)
 
-
-    def _find_dividers(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+    def _find_thresholds_2(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        """
+        NOT YET DOCUMENTED
+        This method returns the points for a continuous attribute that could be possible thresholds, in a different way.
+        """ 
         values_sort = [[v, l] for v, l in zip(values, labels)]
         values_sort = sorted(values_sort, key=lambda x: x[0])
 
@@ -298,8 +317,7 @@ class DecisionTree(Classifier):
 
 def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray):
     """
-    You will implement this method.
-    Given a trained decision tree and labelled dataset, Evaluate the tree and print metrics.
+    NOT YET DOCUMENTED
     """
 
     y_hat = dtree.predict(X)
@@ -312,14 +330,13 @@ def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray
 
 def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = True, information_gain: bool = True):
     """
-    It is highly recommended that you make a function like this to run your program so that you are able to run it
-    easily from a Jupyter notebook. This function has been PARTIALLY implemented for you, but not completely!
+    NOT YET DOCUMENTED
 
-    :param data_path: The path to the data.
-    :param tree_depth_limit: Depth limit of the decision tree
-    :param use_cross_validation: If True, use cross validation. Otherwise, run on the full dataset.
-    :param information_gain: If true, use information gain as the split criterion. Otherwise use gain ratio.
-    :return:
+    Args: 
+        data_path: The path to the data.
+        tree_depth_limit: Depth limit of the decision tree
+        use_cross_validation: If True, use cross validation. Otherwise, run on the full dataset.
+        information_gain: If true, use information gain as the split criterion. Otherwise use gain ratio.
     """
 
     # last entry in the data_path is the file base (name of the dataset)
@@ -345,8 +362,7 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
 
 if __name__ == '__main__':
     """
-    THIS IS YOUR MAIN FUNCTION. You will implement the evaluation of the program here. We have provided argparse code
-    for you for this assignment, but in the future you may be responsible for doing this yourself.
+    NOT YET DOCUMENTED
     """
 
     # Set up argparse arguments
