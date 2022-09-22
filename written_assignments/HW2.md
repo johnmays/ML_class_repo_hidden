@@ -50,9 +50,21 @@ If you partition on $A$, both resulting 'child' partitions have their own 50-50 
 
 Similarly, partitioning on $B$ and $C$ result in 50-50 distributions, so they both have entropies of 1 as well. If partitioning on all attributes results in the same entropy as the original distribution, then all attributes have no information gain.
 
-(ii) If IG(X) is 0 for all attributes, this means that the decision tree corresponding to that Boolean function would have no information gain from partitioning in its root node. No matter what attribute you partition on at the root, the corresponding left and right subtrees always have identical class distributions.
+(ii) If IG(X) is 0 for all attributes, this means that the decision tree corresponding to that Boolean function would have no information gain from partitioning in its root node. No matter what attribute you partition on at the root, the corresponding left and right subtrees always have identical class distributions to the original distribution.
 
-(iii) The naive answer to this would be $2^{2^{n-1}}$. This is because the nature of this problem favors 'symmetrical' class labels (like $01011010$), which naturally halves the number of combinations (i.e. $2^{2^n \over 2}$). The naive answer would be terribly mistaken.
+(iii) Finding the exact number of such 'indecisive' functions for an arbitrary $n$ is currently an unsolved problem. But, it's possible to describe bounds on the number. Assume that the example distribution is equal across combinations of attributes; we can show that, at a minimum, every Boolean function for which $X$ is always classified with the same label as $\neg X$ is indecisive:
+
+- Consider an arbitrary attribute $A$. If we partition on $A$, then we produce two sets of examples: $P_0$, where $A$ is false, and $P_1$, where $A$ is true.
+- Because there's an equal distribution across all combinations, there are an equal number of examples for any given combination of attributes. The number of combinations for which $A$ is false is equal to the number of combinations for which $A$ is true, so the number of examples with each value is also equal, and $P_0$ and $P_1$ are the same size.
+- Every example $E$ in $P_0$ has an 'inverse' combination in which every value is the opposite. By the equal distribution assumption, the number of 'inverses' of $E$ is the same as the number of instances of $E$. And trivially, these inverses must be in $P_1$.
+- It's intuitive that the examples in $P_0$ would map bijectively to their respective inverses in $P_1$. So, if every example and its inverse has the same class label, then $P_0$ and $P_1$ must have identical proportions of every class label.
+- If each partition has the same probabilities of class labels, and each partition is the same size, then the original example set must have also had the same probabilities of class labels. 
+
+If the probabilities of the class labels in the original example set is the same as the probabilities of the class labels in $P_0$ and $P_1$, then the entropy of the original set, the entropy of $P_0$, and the entropy of $P_1$ must be the same, since entropy depends only on the distribution of probabilities across classes. Thus, $IG(X) = 0$ for any attribute $X$ at the root.
+
+The number of Boolean functions where every example is classified under the same label as its inverse is $2^{2^{n-1}}$. This is because you're basically only setting labels for half of the attribute combinations, or ${2^{n} \over 2} = 2^{n-1}$ attribute combinations; the other half of the labels is just based on their inverses in the first half. **So, $\Omega(n) = 2^{2^{n-1}}$.**
+
+A simple, but clear upper bound on the number of indecisive functions is $O(n) = 2^{2^{n} - 1}$. This is just because, for the two partitions from the root to have the same number of examples with $y = 1$, *the number of values with* $y = 1$ *must be even.* The set of Boolean functions with an even number of combinations for which $y = 1$ accounts for half of all functions. **So, an upper bound is $2^{2^n} \over 2$, or $2^{2^{n} - 1}$.**
 
 9.	Show that for a continuous attribute X, the only split values we need to check to determine a split with max IG(X) lie between points with different labels. (Hint: consider the following setting for X: there is a candidate split point $S$ in the middle of $N$ examples with the same label. To the left of $S$ are $n$ such examples. To the left of $N$, there are $L0$ examples with label negative and the rest positive, and likewise $(M0, M1)$ to the right. Express the information gain of $S$ as a function of $n$. Then show that this function is maximized either when $n=0$ or $n=N$ with all else constant.) (20 points)
 
