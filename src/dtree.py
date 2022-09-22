@@ -1,4 +1,5 @@
 import argparse
+from locale import YESEXPR
 import os.path
 import warnings
 
@@ -144,9 +145,9 @@ class DecisionTree(Classifier):
 
         Returns: boolean that is true if (every label in y is 1) or (every label in y is 0)
         """
-        norm = np.linalg.norm(y, ord=1)
+        n_zeros, n_ones = util.count_label_occurrences(y)
         size = np.size(y)
-        if norm == size or norm == 0:
+        if n_zeros == size or n_ones == 0:
             return True # then node is pure
         else:
             return False
