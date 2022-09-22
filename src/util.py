@@ -22,9 +22,9 @@ def count_label_occurrences(y: np.ndarray) -> Tuple[int, int]:
 
     Returns: A tuple containing the number of negative occurrences, and number of positive occurences, respectively.
     """
-    n_ones = (y == 1).sum()
-    n_zeros = y.size - n_ones
-    return n_zeros, n_ones
+
+    n_ones = np.linalg.norm(y, ord=1) 
+    return len(y) - n_ones, n_ones
 
 
 def majority_class(y: np.ndarray) -> int:
@@ -41,8 +41,12 @@ def entropy(y: np.ndarray) -> float:
 
     Returns: The Shannon entropy of the node.
     """
+    if len(y) == 0:
+        return 0
     n_zeros, n_ones = count_label_occurrences(y)
-    p_zero, p_one = n_zeros / y.size(), n_ones / y.size()
+    p_zero, p_one = n_zeros / len(y), n_ones / len(y)
+    if p_zero == 0 or p_one == 0:
+        return 0
     return (-p_zero * np.log2(p_zero)) + (-p_one * np.log2(p_one))
 
 
@@ -69,7 +73,7 @@ def entropy_nb(y: np.ndarray) -> float:
     return H
 
 
-def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:
+def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:
     """
     Returns the information gain for partitioning on an attribute, 
     given a set of training examples and class labels associated with a node.
@@ -84,7 +88,6 @@ def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float)
     Returns: The information gain by partitioning the examples on the given attribute test.
     """
 
-    H_y = entropy(y) # the entropy of the node before partitioning
     H_y_given_x = 0 # the entropy of the node after partitioning 
 
     values_for_attribute = X[:, index]
@@ -105,13 +108,12 @@ def information_gain(X: np.ndarray, y: np.ndarray, index: int, threshold: float)
         ex_greater_than = []
         for i in range(len(y)):
             if values_for_attribute[i] <= threshold:
-                ex_less_than_equal.append(values_for_attribute[i])
+                ex_less_than_equal.append(y[i])
             else:
-                ex_greater_than.append(values_for_attribute[i])
-        H_y_given_x = (len(ex_less_than_equal) * entropy(ex_less_than_equal) / len(y)) + \
-            (len(ex_greater_than) * entropy(ex_greater_than) / len(y))
+                ex_greater_than.append(y[i])
+        H_y_given_x = (len(ex_less_than_equal) * entropy(ex_less_than_equal) / len(y)) + (len(ex_greater_than) * entropy(ex_greater_than) / len(y))
         
-    return H_y - H_y_given_x
+    return H_y_given_x
 
 
 def gain_ratio(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:
@@ -128,7 +130,7 @@ def gain_ratio(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> fl
     
     Returns: The gain ratio for partitioning the examples on the given attribute test.
     """
-    ig = information_gain(X, y, index, threshold)
+    ig = entropy(y) - conditional_entropy(X, y, index, threshold)
 
     if threshold is None:
         branches = X[:, index]
@@ -339,10 +341,10 @@ def accuracy(y: np.ndarray, y_hat: np.ndarray) -> float:
     Returns: Accuracy
     """
 
-    if y.size != y_hat.size:
+    if len(y) != len(y_hat):
         raise ValueError('y and y_hat must be the same shape/size!')
 
-    n = y.size
+    n = len(y)
 
     return (y == y_hat).sum() / n
 

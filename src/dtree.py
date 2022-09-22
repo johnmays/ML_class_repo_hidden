@@ -2,11 +2,11 @@ import argparse
 import os.path
 import warnings
 
-from typing import Boolean, Optional, List, Tuple
+from typing import Optional, List, Tuple
 
 import numpy as np
 from sting.classifier import Classifier
-from sting.data import Feature, parse_c45
+from sting.data import Feature, FeatureType, parse_c45
 
 import util
 
@@ -25,16 +25,11 @@ class TreeNode():
         self.nominal_values = []
 
         # If leaf_node property is true, this node will be given a label
-        self.leaf_node = True
         self.label = None
 
     @property
     def leaf_node(self):
-        if self.children == []:
-            self.leaf_node = True
-        else:
-            self.leaf_node = False
-        return self.leaf_node
+        return (self.children == [])
 
 class DecisionTree(Classifier):
     def __init__(self, schema: List[Feature], tree_depth_limit=0, use_information_gain=True):
@@ -50,6 +45,7 @@ class DecisionTree(Classifier):
         self.tree_depth_limit = tree_depth_limit
         self.use_information_gain = use_information_gain
         self.root = TreeNode()
+        self.size = 1
 
     def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None) -> None:
         """
@@ -60,12 +56,13 @@ class DecisionTree(Classifier):
             y: The labels. The shape is (n_examples,)
             weights: Weights for each example. Will become relevant later in the course, ignore for now.
         """
+        print(f"FITTING {len(X)} EXAMPLES WITH {len(self._schema)} ATTRIBUTES")
         if self.schema == []:
             self._make_majority_classifier(y, self.root)
         else:
-            self._build_tree(X, y, list(range(self.schema)), self.root)
+            self._build_tree(X, y, list(range(len(self.schema))), self.root, 0)
 
-    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features, current_node) -> TreeNode:
+    def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_features: List, current_node: TreeNode, depth: int) -> TreeNode:
         """
         Recursive method for considering partitions and building the tree.
 
@@ -75,37 +72,52 @@ class DecisionTree(Classifier):
             possible_features: The list of the indices of the schema's features that are left to choose from at this node.
             current_node: The TreeNode to be considered for a partition.
         """
-        if self._pure_node(y) or possible_features == []:
+        if self._pure_node(y):
+            print("PURE NODE")
+        if possible_features == []:
+            print("NO MORE FEATURES")
+        if depth == self.tree_depth_limit:
+            print("I'M AT MY LIMIT")
+
+        print(f"Shape: {np.shape(X)}")
+        print(y)
+
+        if self._pure_node(y) or possible_features == [] or depth == self.tree_depth_limit:
             self._make_majority_classifier(y, current_node)
         else: # prepare to partition:
             best_feature_index, best_feature_threshold = self._determine_split_criterion(X, y, possible_features)
             if best_feature_index == None: # ==> Max IG(X) = 0
+                print("NO GOOD")
                 self._make_majority_classifier(y, current_node)
             else:
                 # remove feature from possible_features
                 possible_features_updated = possible_features[:best_feature_index] + possible_features[best_feature_index+1:]
                 current_node.attribute_index = best_feature_index
                 # create children and partition
-                if self.schema[best_feature_index].ftype == Feature.FeatureType.CONTINUOUS:
+                if self.schema[best_feature_index].ftype == FeatureType.CONTINUOUS:
                     # Continuous Partition procedure:
+                    print("Committing continuous node with attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
                     current_node.threshold = best_feature_threshold
-                    child_one = TreeNode()
-                    child_two = TreeNode()
-                    current_node.children.append(child_one)
-                    current_node.children.append(child_two)
+                    child_one, child_two = TreeNode(), TreeNode()
+                    self.size += 2
+                    current_node.children.extend([child_one, child_two])
                     X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=True)
-                    self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_one)
+                    self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_one, depth+1)
                     X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=False)
-                    self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_two)
-                elif self.schema[best_feature_index].ftype == Feature.FeatureType.NOMINAL:
+                    self._build_tree(X_partition_g, Y_partition_g, possible_features_updated, child_two, depth+1)
+                
+                elif self.schema[best_feature_index].ftype == FeatureType.NOMINAL:
                     # Nominal Partition procedure:
+                    print("Committing nominal node with attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
                     for value in self.schema[best_feature_index].values:
                         child = TreeNode()
+                        self.size += 1
+                        current_node.nominal_values.append(value)
                         current_node.children.append(child)
                         X_partition, Y_partition = self._partition_nominal(X, y, best_feature_index, value)
-                        self._build_tree(X_partition, Y_partition, possible_features_updated, child)
+                        self._build_tree(X_partition, Y_partition, possible_features_updated, child, depth+1)
 
-    def _make_majority_classifier(y: np.ndarray, node: TreeNode) -> TreeNode:
+    def _make_majority_classifier(self, y: np.ndarray, node: TreeNode) -> TreeNode:
         """
         Helper method for turning a node into a majority classifier.
 
@@ -136,7 +148,7 @@ class DecisionTree(Classifier):
         else:
             return False
 
-    def _partition_nominal(X: np.ndarray, y: np.ndarray, feature_index, value) -> Tuple[np.ndarray, np.ndarray]:
+    def _partition_nominal(self, X: np.ndarray, y: np.ndarray, feature_index, value) -> Tuple[np.ndarray, np.ndarray]:
         """
         Returns: the subset of X and y corresponding to the partition based upon the nominal value
         """
@@ -146,9 +158,9 @@ class DecisionTree(Classifier):
             if example[feature_index] == value:
                 X_partitioned.append(example)
                 y_partitioned.append(label)
-        return X_partitioned, y_partitioned
+        return np.array(X_partitioned), np.array(y_partitioned)
 
-    def _partition_continuous(X: np.ndarray, y: np.ndarray, feature_index, threshold, leq:Boolean):
+    def _partition_continuous(self, X: np.ndarray, y: np.ndarray, feature_index, threshold, leq: bool):
         """
         Returns: the subset of X and y corresponding to the partition either (greater than) or (less than or equal to) the threshold
         """
@@ -161,7 +173,7 @@ class DecisionTree(Classifier):
             elif not leq and example[feature_index] > threshold:
                 X_partitioned.append(example)
                 y_partitioned.append(label)
-        return X_partitioned, y_partitioned
+        return np.array(X_partitioned), np.array(y_partitioned)
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -213,27 +225,37 @@ class DecisionTree(Classifier):
         best_feature_index = None
         best_threshold = None
 
+        H_y = util.entropy(y)
+
         for index in possible_features:
-            if self._schema[index].ftype == Feature.FeatureType.CONTINUOUS:
+            feature = self._schema[index]
+            if feature.ftype == FeatureType.CONTINUOUS:
                 # helper function that finds all possible thresholds
-                dividers = self._find_dividers(X[:, index], y)
+                dividers = self._find_dividers_jank(X[:, index], y)
+                
+                b = 0
+
                 for div in dividers:
                     if self.use_information_gain:
-                        current_IG = util.information_gain(X, y, index, div)
+                        current_IG = H_y - util.conditional_entropy(X, y, index, div)
                         if current_IG > max_information_measure:
                             max_information_measure = current_IG
                             best_feature_index = index
                             best_threshold = div
+                        if current_IG > b:
+                            b = current_IG
                     else:
                         current_GR = util.gain_ratio(X, y, index, div)
                         if current_GR > max_information_measure:
                             max_information_measure = current_GR
                             best_feature_index = index
                             best_threshold = div
+                print(f"Checking continuous attribute {feature.name} ({index})...    IG = {b}")
 
             else:
                 if self.use_information_gain:
-                    current_IG = util.information_gain(X, y, index, None)
+                    current_IG = H_y - util.conditional_entropy(X, y, index, None)
+                    print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}")
                     if current_IG > max_information_measure:
                         max_information_measure = current_IG
                         best_feature_index = index
@@ -244,6 +266,10 @@ class DecisionTree(Classifier):
                         best_feature_index = index
         
         return best_feature_index, best_threshold
+
+
+    def _find_dividers_jank(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        return np.unique(values)
 
 
     def _find_dividers(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
@@ -268,11 +294,9 @@ def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray
     y_hat = dtree.predict(X)
     acc = util.accuracy(y, y_hat)
     print(f'Accuracy:{acc:.2f}')
-    print('Size:', 0)
+    print('Size:', dtree.size)
     print('Maximum Depth:', dtree.tree_depth_limit)
     print('First Feature:', dtree.schema[0])
-
-    raise NotImplementedError()
 
 
 def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = True, information_gain: bool = True):
