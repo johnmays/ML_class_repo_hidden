@@ -75,7 +75,7 @@ def entropy_nb(y: np.ndarray) -> float:
 
 def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:
     """
-    Returns the information gain for partitioning on an attribute, 
+    Returns the conditional entropy H(Y|X) for partitioning on an attribute, 
     given a set of training examples and class labels associated with a node.
 
     Args:
@@ -85,7 +85,7 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
         threshold: The value of the attribute to split by, if the attribute is continuous.
             Should be None if the index is nominal.
     
-    Returns: The information gain by partitioning the examples on the given attribute test.
+    Returns: The conditional entropy by partitioning the examples on the given attribute test.
     """
 
     H_y_given_x = 0 # the entropy of the node after partitioning 
@@ -114,6 +114,14 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
         H_y_given_x = (len(ex_less_than_equal) * entropy(ex_less_than_equal) / len(y)) + (len(ex_greater_than) * entropy(ex_greater_than) / len(y))
         
     return H_y_given_x
+
+
+def attribute_entropy(X: np.ndarray, index: int, threshold: float) -> float:
+    if threshold is None:
+        branches = X[:, index]
+    else:
+        branches = [(x <= threshold) for x in X[:, index]]
+    return entropy_nb(branches)
 
 
 def gain_ratio(X: np.ndarray, y: np.ndarray, index: int, threshold: float) -> float:

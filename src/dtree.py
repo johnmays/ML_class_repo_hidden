@@ -96,11 +96,13 @@ class DecisionTree(Classifier):
                 # create children and partition
                 if self.schema[best_feature_index].ftype == FeatureType.CONTINUOUS:
                     # Continuous Partition procedure:
-                    print("Committing continuous node with attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
+                    print("Committing continuous node with attribute " + self.schema[best_feature_index].name + ", value " + str(best_feature_threshold) + " at depth " + str(depth))
                     current_node.threshold = best_feature_threshold
+
                     child_one, child_two = TreeNode(), TreeNode()
-                    self.size += 2
                     current_node.children.extend([child_one, child_two])
+                    self.size += 2
+                    
                     X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=True)
                     self._build_tree(X_partition_leq, Y_partition_leq, possible_features_updated, child_one, depth+1)
                     X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_feature_index, best_feature_threshold, leq=False)
@@ -111,9 +113,10 @@ class DecisionTree(Classifier):
                     print("Committing nominal node with attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
                     for value in self.schema[best_feature_index].values:
                         child = TreeNode()
-                        self.size += 1
                         current_node.nominal_values.append(value)
                         current_node.children.append(child)
+                        self.size += 1
+                        
                         X_partition, Y_partition = self._partition_nominal(X, y, best_feature_index, value)
                         self._build_tree(X_partition, Y_partition, possible_features_updated, child, depth+1)
 
@@ -245,12 +248,18 @@ class DecisionTree(Classifier):
                         if current_IG > b:
                             b = current_IG
                     else:
-                        current_GR = util.gain_ratio(X, y, index, div)
+                        current_GR = (H_y - util.conditional_entropy(X, y, index, div)) / util.attribute_entropy(X, index, div)
                         if current_GR > max_information_measure:
                             max_information_measure = current_GR
                             best_feature_index = index
                             best_threshold = div
-                print(f"Checking continuous attribute {feature.name} ({index})...    IG = {b}")
+                        if current_GR > b:
+                            b = current_GR
+                
+                if self.use_information_gain:
+                    print(f"Checking continuous attribute {feature.name} ({index})...    IG = {b}")
+                else:
+                    print(f"Checking continuous attribute {feature.name} ({index})...    GR = {b}")
 
             else:
                 if self.use_information_gain:
@@ -260,7 +269,8 @@ class DecisionTree(Classifier):
                         max_information_measure = current_IG
                         best_feature_index = index
                 else:
-                    current_GR = util.gain_ratio(X, y, index, None)
+                    current_GR = (H_y - util.conditional_entropy(X, y, index, None)) / util.attribute_entropy(X, index, None)
+                    print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}")
                     if current_GR > max_information_measure:
                         max_information_measure = current_GR
                         best_feature_index = index
