@@ -37,7 +37,7 @@ class DecisionTree(Classifier):
         This class handles the DecisionTree.  It has methods for building the tree (fit()), and a method for predicting on new examples.
         """
         self._schema = schema  # A set of features with their properties
-        self.tree_depth_limit = tree_depth_limit
+        self.tree_depth_limit = -1 if tree_depth_limit == 0 else tree_depth_limit
         self.use_information_gain = use_information_gain
         self.root = TreeNode() # beginning with a default TreeNode as the root
         self.size = 1
@@ -71,6 +71,7 @@ class DecisionTree(Classifier):
             depth: a measure of how deep current_node is in the tree
         """
         print(f"CREATING NODE ON {len(X)} EXAMPLES (depth: {depth})")
+        
         if depth > self.depth:
             self.depth = depth
 
@@ -78,9 +79,9 @@ class DecisionTree(Classifier):
 
         if self._pure_node(y):
             print("** Pure node, skipping **")
-        if possible_attributes == []:
+        elif possible_attributes == []:
             print("** No more features, skipping **")
-        if depth == self.tree_depth_limit:
+        elif depth == self.tree_depth_limit:
             print("** At depth limit, skipping **")
         
         if self._pure_node(y) or possible_attributes == [] or depth == self.tree_depth_limit:
@@ -256,7 +257,8 @@ class DecisionTree(Classifier):
             feature = self._schema[index]
             if feature.ftype == FeatureType.CONTINUOUS:
                 # helper function that finds all possible thresholds
-                dividers = self._find_thresholds(X[:, index])
+                dividers = self._find_thresholds_2(X[:, index], y)
+                print(f"Attribute {feature.name} has {len(dividers)} potential thresholds")
                 
                 b = 0
 
@@ -279,9 +281,9 @@ class DecisionTree(Classifier):
                             b = current_GR
                 
                 if self.use_information_gain:
-                    print(f"Checking continuous attribute {feature.name} ({index})...    IG = {b}")
+                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {b}")
                 else:
-                    print(f"Checking continuous attribute {feature.name} ({index})...    GR = {b}")
+                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {b}")
 
             else:
                 if self.use_information_gain:
@@ -335,7 +337,7 @@ class DecisionTree(Classifier):
                 dividers.append((values_sort[i][0] + values_sort[i-1][0]) / 2)
         dividers.append(values_sort[-1][0] + 0.01)
         
-        return np.array(dividers)
+        return np.unique(dividers)
 
 
 def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray):

@@ -96,10 +96,9 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
     
     Returns: The conditional entropy by partitioning the examples on the given attribute test.
     """
-
     H_y_given_x = 0 # the entropy of the node after partitioning 
 
-    values_for_attribute = X[:, index]
+    values_for_attribute = np.array(X[:, index])
     if threshold is None:
         # Create a dictionary that maps each nominal value to a list of class labels
         # for examples with that value
@@ -113,14 +112,22 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
             H_y_given_x += (len(labels) / len(y)) * entropy(labels)
             
     else:
-        ex_less_than_equal = []
-        ex_greater_than = []
-        for i in range(len(y)):
-            if values_for_attribute[i] <= threshold:
-                ex_less_than_equal.append(y[i])
-            else:
-                ex_greater_than.append(y[i])
-        H_y_given_x = (len(ex_less_than_equal) * entropy(ex_less_than_equal) / len(y)) + (len(ex_greater_than) * entropy(ex_greater_than) / len(y))
+        # This code has been VERY heavily optimized
+        lte = values_for_attribute <= threshold
+        gt = lte == False
+
+        total_lte = np.sum(lte)
+        total_gt = len(y) - total_lte
+        
+        ones_lte = np.sum(lte * y)
+        ones_gt = np.sum(gt * y)
+
+        if total_lte != 0:
+            p_lte = ones_lte/total_lte
+            H_y_given_x += ((total_lte/len(y)) * (-p_lte*np.log2(p_lte) + -(1-p_lte)*np.log2(1-p_lte))) 
+        if total_gt != 0:
+            p_gt = ones_gt/total_gt
+            H_y_given_x += ((total_gt/len(y)) * (-p_gt*np.log2(p_gt) + -(1-p_gt)*np.log2(1-p_gt)))
         
     return H_y_given_x
 
