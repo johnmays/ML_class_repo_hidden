@@ -191,11 +191,11 @@ def cv_split(
 
     For example, 5 fold cross validation would return the following:
     (
-        (X_train_1, y_train_1, X_test_1, y_test_1),\n
-        (X_train_2, y_train_2, X_test_2, y_test_2),\n
-        (X_train_3, y_train_3, X_test_3, y_test_3),\n
-        (X_train_4, y_train_4, X_test_4, y_test_4),\n
-        (X_train_5, y_train_5, X_test_5, y_test_5)\n
+        (X_train_1, y_train_1, X_test_1, y_test_1),
+        (X_train_2, y_train_2, X_test_2, y_test_2),
+        (X_train_3, y_train_3, X_test_3, y_test_3),
+        (X_train_4, y_train_4, X_test_4, y_test_4),
+        (X_train_5, y_train_5, X_test_5, y_test_5)
     )
 
     """

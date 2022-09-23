@@ -393,7 +393,9 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
 
 if __name__ == '__main__':
     """
-    NOT YET DOCUMENTED
+    Main method.  
+    
+    Parses run arguments, then calls dtree with formatted arguments.
     """
 
     # Set up argparse arguments
