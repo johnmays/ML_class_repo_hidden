@@ -28,6 +28,15 @@ def count_label_occurrences(y: np.ndarray) -> Tuple[int, int]:
 
 
 def majority_class(y: np.ndarray) -> int:
+    """
+    Returns the majority class out of a list of class labels.
+
+    Args:
+        y: A list of class labels containing only 1s and 0s.
+    
+    Returns: The majority class in the list.
+    """
+
     n_zeros, n_ones = count_label_occurrences(y)
     return 0 if n_zeros > n_ones else 1
 
@@ -117,6 +126,15 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
 
 
 def attribute_entropy(X: np.ndarray, index: int, threshold: float) -> float:
+    """
+    Returns the entropy H(i) of a given attribute i over a set of examples X.
+
+    Args:
+        X: A set of examples to check for values of an attribute.
+        index: The index of the attribute to get the entropy of.
+
+    Returns: The entropy of the attribute within the set of examples.
+    """
     if threshold is None:
         branches = X[:, index]
     else:
@@ -250,7 +268,6 @@ def cv_split(
         else:
             result_y = np.append(y_one, y_zero)
         tup += ((result_x, result_y),)
-        print(tup)
                 
 
 
@@ -275,7 +292,7 @@ def cv_split(
                 
         # Append the rest of ndarray as the last fold
         tup += ((X,y),)
-        print(tup)
+
     # Combine the folds into n sets
     result = ()
     for i in range(0, len(tup)):
@@ -296,13 +313,6 @@ def cv_split(
         result += ((train_x, train_y, test_x, test_y),)
     
     return result
-
-
-        
-
-    warnings.warn('cv_split is not yet implemented. Simply returning the entire dataset as a single fold...')
-
-    return (X, y, X, y),
 
 
 def getData(X: np.ndarray, y:np.ndarray, num: int):
@@ -346,7 +356,7 @@ def getData(X: np.ndarray, y:np.ndarray, num: int):
 
 def accuracy(y: np.ndarray, y_hat: np.ndarray) -> float:
     """
-    Another example of a helper method. Implement the rest yourself!
+    Returns the accuracy between a true results array and a predicted array.
 
     Args:
         y: True labels.

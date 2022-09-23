@@ -91,7 +91,7 @@ class DecisionTree(Classifier):
                 self._make_majority_classifier(y, current_node)
             else:
                 # remove feature from possible_attributes
-                possible_attributes_updated = possible_attributes[:best_attribute_index] + possible_attributes[best_attribute_index+1:]
+                possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index]
                 current_node.attribute_index = best_attribute_index
                 # create children and partition
                 if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
@@ -146,15 +146,14 @@ class DecisionTree(Classifier):
         Returns: boolean that is true if (every label in y is 1) or (every label in y is 0)
         """
         n_zeros, n_ones = util.count_label_occurrences(y)
-        size = np.size(y)
-        if n_zeros == size or n_ones == 0: # then node is pure
+        if n_zeros == 0 or n_ones == 0: # then node is pure
             return True
         else:
             return False
 
     def _partition_nominal(self, X: np.ndarray, y: np.ndarray, feature_index, value) -> Tuple[np.ndarray, np.ndarray]:
         """
-        A method for partitioning a subset of training data
+        A method for partitioning a subset of training data.
 
         Args:
             X: A subset of the examples in the dataset that the returned partition will be nondestructively taken from. Shape is (n_examples, n_features).
@@ -174,7 +173,7 @@ class DecisionTree(Classifier):
 
     def _partition_continuous(self, X: np.ndarray, y: np.ndarray, feature_index, threshold, leq: bool):
         """
-        A method for partitioning a subset of training data
+        A method for partitioning a subset of training data.
 
         Args:
             X: A subset of the examples in the dataset that the returned partition will be nondestructively taken from. Shape is (n_examples, n_features).
@@ -257,7 +256,7 @@ class DecisionTree(Classifier):
             feature = self._schema[index]
             if feature.ftype == FeatureType.CONTINUOUS:
                 # helper function that finds all possible thresholds
-                dividers = self._find_thresholds(X[:, index], y)
+                dividers = self._find_thresholds(X[:, index])
                 
                 b = 0
 
@@ -300,17 +299,32 @@ class DecisionTree(Classifier):
         
         return best_attribute_index, best_threshold
 
-    def _find_thresholds(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
+    def _find_thresholds(self, values: np.ndarray) -> np.ndarray:
         """
-        NOT YET DOCUMENTED
-        This method returns the points for a continuous attribute that could be possible thresholds.
+        Find a set of candidate thresholds that could be used to partition a continuous variable.
+        In reality, this function just returns the set of unique values of a continuous variable in a set of examples.
+        Even though the set of 'viable' thresholds is much smaller (since only thresholds between values with
+        differing class labels should be considered), *finding thresholds this way is actually far more efficient*.
+        This is because the 'proper' method requires sorting the array of seen values, which can be 10000s of elements long.
+        
+        Args:
+            values: An array of seen values for a given continuous attribute.
+
+        Returns: An array of thresholds to check for partitioning.
         """
         return np.unique(values)
 
     def _find_thresholds_2(self, values: np.ndarray, labels: np.ndarray) -> np.ndarray:
         """
-        NOT YET DOCUMENTED
-        This method returns the points for a continuous attribute that could be possible thresholds, in a different way.
+        Find a set of candidate thresholds that could be used to partition a continuous variable.
+        This function implements the 'proper' method for finding partitioning thresholds:
+        it only returns thresholds between adjacent values with different class labels.
+
+        Args:
+            values: An array of seen values for a given continuous attribute.
+            labels: An array of class labels associated with those values.
+
+        Returns: An array of thresholds to check for partitioning.
         """ 
         values_sort = [[v, l] for v, l in zip(values, labels)]
         values_sort = sorted(values_sort, key=lambda x: x[0])
@@ -326,7 +340,12 @@ class DecisionTree(Classifier):
 
 def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray):
     """
-    NOT YET DOCUMENTED
+    Print information about the performance of a decision tree on testing data.
+
+    Args:
+        dtree: The DecisionTree instance to evaluate.
+        X: An array of examples to use for evaluation.
+        y: An array of class labels associated with the examples in X.
     """
 
     y_hat = dtree.predict(X)
@@ -340,13 +359,13 @@ def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray
 
 def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = True, information_gain: bool = True):
     """
-    NOT YET DOCUMENTED
+    Create and train decision trees on data in a given folder.
 
     Args: 
         data_path: The path to the data.
         tree_depth_limit: Depth limit of the decision tree
         use_cross_validation: If True, use cross validation. Otherwise, run on the full dataset.
-        information_gain: If true, use information gain as the split criterion. Otherwise use gain ratio.
+        information_gain: If true, use information gain as the split criterion. Otherwise, use gain ratio.
     """
 
     # last entry in the data_path is the file base (name of the dataset)
