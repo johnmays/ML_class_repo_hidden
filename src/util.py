@@ -318,8 +318,8 @@ def cv_split(
         train_x = np.delete(train_x, 0, axis=0)
         train_y = np.delete(train_y, 0)
         result += ((train_x, train_y, test_x, test_y),)
-    
     return result
+
 
 
 def getData(X: np.ndarray, y:np.ndarray, num: int):
