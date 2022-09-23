@@ -46,6 +46,7 @@ class DecisionTree(Classifier):
         self.use_information_gain = use_information_gain
         self.root = TreeNode()
         self.size = 1
+        self.depth = 0
 
     def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None) -> None:
         """
@@ -72,22 +73,22 @@ class DecisionTree(Classifier):
             possible_features: The list of the indices of the schema's features that are left to choose from at this node.
             current_node: The TreeNode to be considered for a partition.
         """
+        print(f"CREATING NODE ON {len(X)} EXAMPLES (depth: {depth})")
+        if depth > self.depth:
+            self.depth = depth
+
         if self._pure_node(y):
-            print("PURE NODE")
+            print("** Pure node, skipping **")
         if possible_features == []:
-            print("NO MORE FEATURES")
+            print("** No more features, skipping **")
         if depth == self.tree_depth_limit:
-            print("I'M AT MY LIMIT")
-
-        print(f"Shape: {np.shape(X)}")
-        print(y)
-
+            print("** At depth limit, skipping **")
+        
         if self._pure_node(y) or possible_features == [] or depth == self.tree_depth_limit:
             self._make_majority_classifier(y, current_node)
         else: # prepare to partition:
             best_feature_index, best_feature_threshold = self._determine_split_criterion(X, y, possible_features)
             if best_feature_index == None: # ==> Max IG(X) = 0
-                print("NO GOOD")
                 self._make_majority_classifier(y, current_node)
             else:
                 # remove feature from possible_features
@@ -96,7 +97,7 @@ class DecisionTree(Classifier):
                 # create children and partition
                 if self.schema[best_feature_index].ftype == FeatureType.CONTINUOUS:
                     # Continuous Partition procedure:
-                    print("Committing continuous node with attribute " + self.schema[best_feature_index].name + ", value " + str(best_feature_threshold) + " at depth " + str(depth))
+                    print("Creating node with continuous attribute " + self.schema[best_feature_index].name + ", value " + str(best_feature_threshold) + " at depth " + str(depth))
                     current_node.threshold = best_feature_threshold
 
                     child_one, child_two = TreeNode(), TreeNode()
@@ -110,7 +111,7 @@ class DecisionTree(Classifier):
                 
                 elif self.schema[best_feature_index].ftype == FeatureType.NOMINAL:
                     # Nominal Partition procedure:
-                    print("Committing nominal node with attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
+                    print("Creating node with nominal attribute " + self.schema[best_feature_index].name + " at depth " + str(depth))
                     for value in self.schema[best_feature_index].values:
                         child = TreeNode()
                         current_node.nominal_values.append(value)
@@ -303,10 +304,11 @@ def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray
 
     y_hat = dtree.predict(X)
     acc = util.accuracy(y, y_hat)
+    print("\n***********\n* RESULTS *\n***********")
     print(f'Accuracy:{acc:.2f}')
     print('Size:', dtree.size)
-    print('Maximum Depth:', dtree.tree_depth_limit)
-    print('First Feature:', dtree.schema[0])
+    print('Maximum Depth:', dtree.depth)
+    print('First Feature:', dtree.schema[dtree.root.attribute_index].name, '\n')
 
 
 def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = True, information_gain: bool = True):
