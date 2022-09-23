@@ -166,11 +166,11 @@ def cv_split(
 
     For example, 5 fold cross validation would return the following:
     (
-        (X_train_1, y_train_1, X_test_1, y_test_1),
-        (X_train_2, y_train_2, X_test_2, y_test_2),
-        (X_train_3, y_train_3, X_test_3, y_test_3),
-        (X_train_4, y_train_4, X_test_4, y_test_4),
-        (X_train_5, y_train_5, X_test_5, y_test_5)
+        (X_train_1, y_train_1, X_test_1, y_test_1),\n
+        (X_train_2, y_train_2, X_test_2, y_test_2),\n
+        (X_train_3, y_train_3, X_test_3, y_test_3),\n
+        (X_train_4, y_train_4, X_test_4, y_test_4),\n
+        (X_train_5, y_train_5, X_test_5, y_test_5)\n
     )
 
     """
@@ -192,14 +192,19 @@ def cv_split(
 
     # Split the ndarray randomly into n fold stratified
     if stratified:
+        #Split the examples into fold stratify
+        #Split the examples into ones and zeros
         X_one = X[np.where(y == 1)].copy()
         X_zero = X[np.where(y == 0)].copy()
         y_one = y[np.where(y == 1)].copy()
         y_zero = y[np.where(y == 0)].copy()
+        #Calculate number of ones and zeros in each fold 
+        #Calculate number of remainders of ones and zeros
         ones = int(len(X_one)/folds)
         zeros = int(len(X_zero)/folds)
         remainder_one = len(X_one)%folds
         remainder_zero = len(X_zero)%folds
+        #Evenly distribute extra examples to first X sets where X is the number of remainder
         for f in range(0, folds-1):
             if f < remainder_one:
                 result_x_one, result_y_one, remain_x_one, remain_y_one = getData(X_one, y_one, ones+1)
@@ -209,7 +214,7 @@ def cv_split(
                 result_x_zero, result_y_zero, remain_x_zero, remain_y_zero = getData(X_zero, y_zero, zeros+1)
             else:
                 result_x_zero, result_y_zero, remain_x_zero, remain_y_zero = getData(X_zero, y_zero, zeros)
-            
+            #If we run out of one label we just form the fold with the other label
             if len(result_x_one) == 0:
                 result_x = result_x_zero
             elif len(result_x_zero) == 0:
@@ -224,12 +229,13 @@ def cv_split(
             else:
                 result_y = np.append(result_y_one, result_y_zero)
 
-
+            #Append the result to tup
             tup += ((result_x, result_y),)
             X_one = remain_x_one
             X_zero = remain_x_zero
             y_one = remain_y_one
             y_zero = remain_y_zero
+        #Append the rest of example to the last fold
         if len(X_one) == 0:
             result_x = X_zero
         elif len(X_zero) == 0:
