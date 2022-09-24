@@ -113,21 +113,24 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
             
     else:
         # This code has been VERY heavily optimized
-        lte = values_for_attribute <= threshold
-        gt = lte == False
+        if True:
+            lte = values_for_attribute <= threshold
+            gt = lte == False
 
-        total_lte = np.sum(lte)
-        total_gt = len(y) - total_lte
-        
-        ones_lte = np.sum(lte * y)
-        ones_gt = np.sum(gt * y)
+            total_lte = np.sum(lte)
+            total_gt = np.sum(gt)
 
-        if total_lte != 0:
-            p_lte = ones_lte/total_lte
-            H_y_given_x += ((total_lte/len(y)) * (-p_lte*np.log2(p_lte) + -(1-p_lte)*np.log2(1-p_lte))) 
-        if total_gt != 0:
-            p_gt = ones_gt/total_gt
-            H_y_given_x += ((total_gt/len(y)) * (-p_gt*np.log2(p_gt) + -(1-p_gt)*np.log2(1-p_gt)))
+            ones_lte = np.sum(lte * (y == 1))
+            ones_gt = np.sum(gt * (y == 1))
+
+            if total_lte != 0:
+                p_lte = ones_lte/total_lte
+                if p_lte > 0 and p_lte < 1:
+                    H_y_given_x += ((total_lte/len(y)) * (-p_lte*np.log2(p_lte) + -(1-p_lte)*np.log2(1-p_lte))) 
+            if total_gt != 0:
+                p_gt = ones_gt/total_gt
+                if p_gt > 0 and p_gt < 1:
+                    H_y_given_x += ((total_gt/len(y)) * (-p_gt*np.log2(p_gt) + -(1-p_gt)*np.log2(1-p_gt)))
         
     return H_y_given_x
 
