@@ -92,7 +92,7 @@ class DecisionTree(Classifier):
                 if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
                     # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
                     # Continuous Partition procedure:
-                    print("Assigning node continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth " + str(depth), end='\r')
+                    print("Assigning node continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth (" + str(depth) + ") ", end="\r")
                     current_node.attribute_index = best_attribute_index
                     current_node.threshold = best_attribute_threshold
 
@@ -110,7 +110,7 @@ class DecisionTree(Classifier):
                     # Nominal Partition procedure:
                     possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
                     current_node.attribute_index = best_attribute_index
-                    print("Assigning node nominal attribute " + self.schema[best_attribute_index].name + " at depth " + str(depth), end='\r')
+                    print("Assigning node nominal attribute " + self.schema[best_attribute_index].name + " at depth (" + str(depth) + ")", end="\r")
                     for value in self.schema[best_attribute_index].values:
                         child = TreeNode()
                         current_node.nominal_values.append(value)
@@ -279,20 +279,20 @@ class DecisionTree(Classifier):
                             b = current_GR
                 
                 if self.use_information_gain:
-                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {b}", end='\r')
+                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {b}", end="\r")
                 else:
-                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {b}", end='\r')
+                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {b}", end="\r")
 
             else:
                 if self.use_information_gain:
                     current_IG = H_y - util.conditional_entropy(X, y, index, None)
-                    print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}", end='\r')
+                    print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}", end="\r")
                     if current_IG > max_information_measure:
                         max_information_measure = current_IG
                         best_attribute_index = index
                 else:
                     current_GR = (H_y - util.conditional_entropy(X, y, index, None)) / util.attribute_entropy(X, index, None)
-                    print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}", end='\r')
+                    print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}", end="\r")
                     if current_GR > max_information_measure:
                         max_information_measure = current_GR
                         best_attribute_index = index
