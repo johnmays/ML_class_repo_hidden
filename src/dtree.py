@@ -91,13 +91,12 @@ class DecisionTree(Classifier):
             if best_attribute_index == None: # ==> Max IG(X) = 0
                 self._make_majority_classifier(y, current_node)
             else:
-                # remove feature from possible_attributes
-                possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index]
-                current_node.attribute_index = best_attribute_index
                 # create children and partition
                 if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
+                    # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
                     # Continuous Partition procedure:
                     print("Creating node with continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth " + str(depth))
+                    current_node.attribute_index = best_attribute_index
                     current_node.threshold = best_attribute_threshold
 
                     child_one, child_two = TreeNode(), TreeNode()
@@ -106,12 +105,14 @@ class DecisionTree(Classifier):
                     
                     # Partitioning for less than or equal to the threshold
                     X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=True)
-                    self._build_tree(X_partition_leq, Y_partition_leq, possible_attributes_updated, child_one, depth+1)
+                    self._build_tree(X_partition_leq, Y_partition_leq, possible_attributes, child_one, depth+1)
                     # Partitioning for greater than the threshold
                     X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=False)
-                    self._build_tree(X_partition_g, Y_partition_g, possible_attributes_updated, child_two, depth+1)
+                    self._build_tree(X_partition_g, Y_partition_g, possible_attributes, child_two, depth+1)
                 else: 
                     # Nominal Partition procedure:
+                    possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
+                    current_node.attribute_index = best_attribute_index
                     print("Creating node with nominal attribute " + self.schema[best_attribute_index].name + " at depth " + str(depth))
                     for value in self.schema[best_attribute_index].values:
                         child = TreeNode()
@@ -393,7 +394,9 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
 
 if __name__ == '__main__':
     """
-    NOT YET DOCUMENTED
+    Main method.  
+    
+    Parses run arguments, then calls dtree with formatted arguments.
     """
 
     # Set up argparse arguments

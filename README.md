@@ -10,3 +10,4 @@ This repository contains the files for the group homework assigned in Professor 
 
 - Written Assignment 1 complete: final commit was on 09/08/22
 - Programming Assignment 1 is in progress
+- Written Assignment 2 is in progress
