@@ -118,7 +118,7 @@ def conditional_entropy(X: np.ndarray, y: np.ndarray, index: int, threshold: flo
             gt = lte == False
 
             total_lte = np.sum(lte)
-            total_gt = np.sum(gt)
+            total_gt = len(y) - total_lte
 
             ones_lte = np.sum(lte * (y == 1))
             ones_gt = np.sum(gt * (y == 1))
