@@ -1,5 +1,4 @@
 import argparse
-from locale import YESEXPR
 import os.path
 import warnings
 
@@ -70,19 +69,17 @@ class DecisionTree(Classifier):
             current_node: The TreeNode to be considered for a partition.
             depth: a measure of how deep current_node is in the tree
         """
-        print(f"CREATING NODE ON {len(X)} EXAMPLES (depth: {depth})")
+        print(f"CREATING NODE ON {len(X)} EXAMPLES (depth: {depth})", end='\r')
         
         if depth > self.depth:
             self.depth = depth
 
-        print(y)
-
         if self._pure_node(y):
-            print("** Pure node, skipping **")
+            print("** Pure node, skipping **", end='\r')
         elif possible_attributes == []:
-            print("** No more features, skipping **")
+            print("** No more features, skipping **", end='\r')
         elif depth == self.tree_depth_limit:
-            print("** At depth limit, skipping **")
+            print("** At depth limit, skipping **", end='\r')
         
         if self._pure_node(y) or possible_attributes == [] or depth == self.tree_depth_limit:
             self._make_majority_classifier(y, current_node)
@@ -95,7 +92,7 @@ class DecisionTree(Classifier):
                 if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
                     # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
                     # Continuous Partition procedure:
-                    print("Creating node with continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth " + str(depth))
+                    print("Assigning node continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth " + str(depth), end='\r')
                     current_node.attribute_index = best_attribute_index
                     current_node.threshold = best_attribute_threshold
 
@@ -113,7 +110,7 @@ class DecisionTree(Classifier):
                     # Nominal Partition procedure:
                     possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
                     current_node.attribute_index = best_attribute_index
-                    print("Creating node with nominal attribute " + self.schema[best_attribute_index].name + " at depth " + str(depth))
+                    print("Assigning node nominal attribute " + self.schema[best_attribute_index].name + " at depth " + str(depth), end='\r')
                     for value in self.schema[best_attribute_index].values:
                         child = TreeNode()
                         current_node.nominal_values.append(value)
@@ -259,7 +256,7 @@ class DecisionTree(Classifier):
             if feature.ftype == FeatureType.CONTINUOUS:
                 # helper function that finds all possible thresholds
                 dividers = self._find_thresholds_2(X[:, index], y)
-                print(f"Attribute {feature.name} has {len(dividers)} potential thresholds")
+                print(f"Attribute {feature.name} has {len(dividers)} potential thresholds", end='\r')
                 
                 b = 0
 
@@ -282,20 +279,20 @@ class DecisionTree(Classifier):
                             b = current_GR
                 
                 if self.use_information_gain:
-                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {b}")
+                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {b}", end='\r')
                 else:
-                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {b}")
+                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {b}", end='\r')
 
             else:
                 if self.use_information_gain:
                     current_IG = H_y - util.conditional_entropy(X, y, index, None)
-                    print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}")
+                    print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}", end='\r')
                     if current_IG > max_information_measure:
                         max_information_measure = current_IG
                         best_attribute_index = index
                 else:
                     current_GR = (H_y - util.conditional_entropy(X, y, index, None)) / util.attribute_entropy(X, index, None)
-                    print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}")
+                    print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}", end='\r')
                     if current_GR > max_information_measure:
                         max_information_measure = current_GR
                         best_attribute_index = index
@@ -376,8 +373,6 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
     file_base = path[-1]  # -1 accesses the last entry of an iterable in Python
     root_dir = os.sep.join(path[:-1])
     schema, X, y = parse_c45(file_base, root_dir)
-
-    # print(schema)
 
     if use_cross_validation:
         datasets = util.cv_split(X, y, folds=5, stratified=True)
