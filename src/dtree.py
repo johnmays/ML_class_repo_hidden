@@ -55,7 +55,9 @@ class DecisionTree(Classifier):
         if self.schema == []:
             self._make_majority_classifier(y, self.root)
         else:
-            self._build_tree(X, y, list(range(len(self.schema))), self.root, 0)
+            # remove any 'id' attributes before starting
+            possible_attributes = [i for i in range(len(self.schema)) if self.schema[i].name[-2:] != "id"]
+            self._build_tree(X, y, possible_attributes, self.root, 0)
 
     def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int) -> TreeNode:
         """
