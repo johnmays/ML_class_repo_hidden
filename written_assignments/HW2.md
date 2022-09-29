@@ -70,6 +70,39 @@ A simple, but clear upper bound on the number of indecisive functions is $O(n) =
 
 Answer:
 
+Suppose we have a set of examples whcih have a continuous attribute X. There is a candidate split point $S$ in the middle of **N** examples which all have the same label. There are **n** examples inside the N examples set which is on the left of split point S. Correspondingly there will be **N-n** examples on the right of split point S inside the N examples set. There are **O<sub>L,0</sub>** examples on the left of the N examples which were labeled 0. There are **O<sub>L,1</sub>** examples on the left of the N examples which were labeled 1. Likewise **O<sub>M,0</sub>** and **O<sub>M,1</sub>** represents the examples on the right of N examples. **AllL** denote all the examples on the left of N. **AllM** denote all the examples on the right of N. **All example** denote all the examples in the dataset.
+
+With these notations we can first come up with $H(Y|X=0)$ which is the entropy of examples on the left after partition.
+
+$$
+  \begin{align}
+    H(Y|X=0) &= -(\frac{n+ O_{L,1}}{All L+n} log_{2}\frac{n+ O_{L,1}}{All L+n}+\frac{O_{L,0}}{All L+n} log_{2}\frac{O_{L,0}}{All L+n})
+  \end{align}
+$$
+
+Similally for $H(Y|X=1)$ which is the entropy of examples on the right after partition.
+
+$$
+  \begin{align}
+    H(Y|X=1) &= -(\frac{N-n+ O_{M,1}}{All M+N-n} log_{2}\frac{N-n+ O_{M,1}}{All M+N-n}+\frac{O_{M,0}}{All M+N-n} log_{2}\frac{O_{M,0}}{All M+N-n})
+  \end{align}
+$$
+
+Then we can combine $H(Y|X=0)$ and $H(Y|X=1)$ to get $H(Y|X)$.
+
+$$
+  \begin{align}
+    H(Y|X) &= P(X=0)H(Y|X=0)+P(X=1)H(Y|X=1)\\
+    &=-\frac{AllL+n}{All\ example}(\frac{n+ O_{L,1}}{All L+n} log_{2}\frac{n+ O_{L,1}}{All L+n}+\frac{O_{L,0}}{All L+n} log_{2}\frac{O_{L,0}}{All L+n})-\frac{AllM+N-n}{All\ example}(\frac{N-n+ O_{M,1}}{All M+N-n} log_{2}\frac{N-n+ O_{M,1}}{All M+N-n}+\frac{O_{M,0}}{All M+N-n} log_{2}\frac{O_{M,0}}{All M+N-n})\\
+    &=-\frac{1}{All\ example}((n+ O_{L,1}) log_{2}\frac{n+ O_{L,1}}{All L+n}+(O_{L,0}) log_{2}\frac{O_{L,0}}{All L+n})-\frac{1}{All\ example}((N-n+ O_{M,1}) log_{2}\frac{N-n+ O_{M,1}}{All M+N-n}+O_{M,0} log_{2}\frac{O_{M,0}}{All M+N-n})\\
+    & \text{Since all example is a constant we can just get ride of the coefficient}\\
+    &=-((n+ O_{L,1}) log_{2}\frac{n+ O_{L,1}}{All L+n}+(O_{L,0}) log_{2}\frac{O_{L,0}}{All L+n})-((N-n+ O_{M,1}) log_{2}\frac{N-n+ O_{M,1}}{All M+N-n}+O_{M,0} log_{2}\frac{O_{M,0}}{All M+N-n})\\
+    & \text{Use the proprity of log}\\
+    &=-[(n+ O_{L,1})log_{2}(n+ O_{L,1})-(n+ O_{L,1})log_{2}(All L+n)+ O_{L,0}log_{2}(O_{L,0})- O_{L,0}log_{2}(All L+n)]-[(N-n+ O_{M,1})log_{2}(N-n+ O_{M,1})-(N-n+ O_{M,1})log_{2}(All M+N-n)+ O_{M,0}(log_{2}(O_{M,0})-log_{2}(All M+N-n))]\\
+    \frac{dH(Y|X)}{dn} &= -[log_{2}(n+ O_{L,1})+\frac{n+ O_{L,1}}{ln_{2}n+ O_{L,1}}-log_{2}(All L+n)-\frac{n+ O_{L,1}}{ln_{2}All L+n}+\frac{O_{L,0}}{ln_{2}All L+n}}]-[-log_{2}(N-n+ O_{M,1})-\frac{N-n+ O_{M,1}}{ln_{2}N-n+ O_{M,1}}+log_{2}(All M+N-n)+\frac{N-n+ O_{M,1}}{ln_{2}All M+N-n}+\frac{O_{M,0}}{ln_{2}All M+N-n}]\\
+  \end{align}
+$$
+
 10.	Write a program to sample a set of $N$ points from $(−1,1)^2$. Label the points using the classifier $y=sign(0.5x_1+0.5x_2)$. Generate datasets from your program and use your ID3 code from Programming 1 to learn trees on this data (there is no need to do cross validation or hold out a test set). Plot a graph where the $x$-axis is the value of $N$, over $N={50, 100, 500, 1000, 5000}$, and the $y$-axis is the depth of the tree learned by ID3. Explain your observations. (20 points)
 
 Answer: 
