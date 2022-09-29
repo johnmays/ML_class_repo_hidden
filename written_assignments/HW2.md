@@ -98,10 +98,31 @@ $$
     & \text{Since all example is a constant we can just get ride of the coefficient}\\
     &=-((n+ O_{L,1}) log_{2}\frac{n+ O_{L,1}}{All L+n}+(O_{L,0}) log_{2}\frac{O_{L,0}}{All L+n})-((N-n+ O_{M,1}) log_{2}\frac{N-n+ O_{M,1}}{All M+N-n}+O_{M,0} log_{2}\frac{O_{M,0}}{All M+N-n})\\
     & \text{Use the proprity of log}\\
-    &=-[(n+ O_{L,1})log_{2}(n+ O_{L,1})-(n+ O_{L,1})log_{2}(All L+n)+ O_{L,0}log_{2}(O_{L,0})- O_{L,0}log_{2}(All L+n)]-[(N-n+ O_{M,1})log_{2}(N-n+ O_{M,1})-(N-n+ O_{M,1})log_{2}(All M+N-n)+ O_{M,0}(log_{2}(O_{M,0})-log_{2}(All M+N-n))]\\
-    \frac{dH(Y|X)}{dn} &= -[log_{2}(n+ O_{L,1})+\frac{n+ O_{L,1}}{ln_{2}n+ O_{L,1}}-log_{2}(All L+n)-\frac{n+ O_{L,1}}{ln_{2}All L+n}+\frac{O_{L,0}}{ln_{2}All L+n}}]-[-log_{2}(N-n+ O_{M,1})-\frac{N-n+ O_{M,1}}{ln_{2}N-n+ O_{M,1}}+log_{2}(All M+N-n)+\frac{N-n+ O_{M,1}}{ln_{2}All M+N-n}+\frac{O_{M,0}}{ln_{2}All M+N-n}]\\
+    &=-[(n+ O_{L,1})log_{2}(n+ O_{L,1})-(n+ O_{L,1})log_{2}(All L+n)+ O_{L,0}log_{2}(O_{L,0})- O_{L,0}log_{2}(All L+n)]-[(N-n+ O_{M,1})log_{2}(N-n+ O_{M,1})-(N-n+ O_{M,1})log_{2}(All M+N-n)+ O_{M,0}(log_{2}(O_{M,0})-log_{2}(All M+N-n))]
   \end{align}
 $$
+
+
+$$
+  \begin{align}
+  \frac{dH(Y|X)}{dn} &= -[log_{2}(n+ O_{L,1})+\frac{n+ O_{L,1}}{ln(2)(n+ O_{L,1})}-log_{2}(All L+n)-\frac{n+ O_{L,1}}{ln(2)(All L+n)}+\frac{O_{L,0}}{ln(2)(All L+n)}]-[-log_{2}(N-n+ O_{M,1})-\frac{N-n+ O_{M,1}}{ln(2)(N-n+ O_{M,1})}+log_{2}(All M+N-n)+\frac{N-n+ O_{M,1}}{ln(2)(All M+N-n)}+\frac{O_{M,0}}{ln(2)(All M+N-n)}]\\
+  &=-[log_{2}(n+ O_{L,1})-log_{2}(All L+n)-\frac{n+ O_{L,1}}{ln(2)(All L+n)}+\frac{O_{L,0}}{ln(2)(All L+n)}]+[log_{2}(N-n+ O_{M,1})-log_{2}(All M+N-n)-\frac{N-n+ O_{M,1}}{ln(2)(All M+N-n)}-\frac{O_{M,0}}{ln(2)(All M+N-n)}]\\
+  &=-[log_{2}(n+ O_{L,1})-log_{2}(All L+n)-\frac{n+ O_{L,1}+O_{L,0}}{ln(2)(All L+n)}]+[log_{2}(N-n+ O_{M,1})-log_{2}(All M+N-n)-\frac{N-n+ O_{M,1}+O_{M,0}}{ln(2)(All M+N-n)}]\\
+  & \text{remember how we defined O<sub>L,0</sub>, O<sub>L,1</sub>, O<sub>M,0</sub>, and O<sub>M,0</sub>. Adding them togather is just All L and All M}\\
+  &=-[log_{2}(n+ O_{L,1})-log_{2}(All L+n)-\frac{1}{ln(2)}]+[log_{2}(N-n+ O_{M,1})-log_{2}(All M+N-n)-\frac{1}{ln(2)}]\\
+  &=-log_{2}(n+ O_{L,1})+log_{2}(All L+n)+log_{2}(N-n+ O_{M,1})-log_{2}(All M+N-n)\\
+  \end{align}
+$$
+
+$$
+  \begin{align}
+  \frac{dH(Y|X)^2}{dn^2} &= -\frac{1}{ln(2)(n+ O_{L,1})}+\frac{1}{ln(2)(All L+n)}-\frac{1}{ln(2)(N-n+ O_{M,1})}+\frac{1}{ln(2)(All M+N-n)}
+  \end{align}
+$$
+
+From our definition of variables, we can tell that the second derivative of dH(Y|X) is smaller or equals to 0. Because n+ O<sub>L,1</sub> is always smaller or equals to All L+n and N-n+ O<sub>M,1</sub> is always smaller or equals to All M+N-n. A bigger denominator will have smaller value. So the second derivative will always be less than or equals to 0. Since H(Y) is a constant and will becocme 0 after derivative, this is also the second derivative of IG(X). So the optimal I found in first derivative will be local maxima of IG(X).
+
+The local optima of bounded range will only exist inside the range or on the boundry. Since I can not find a point inside the range where the first derivative equals to 0, I can say that the local optima exists on the boundry which is n=0 and n=N.
 
 10.	Write a program to sample a set of $N$ points from $(−1,1)^2$. Label the points using the classifier $y=sign(0.5x_1+0.5x_2)$. Generate datasets from your program and use your ID3 code from Programming 1 to learn trees on this data (there is no need to do cross validation or hold out a test set). Plot a graph where the $x$-axis is the value of $N$, over $N={50, 100, 500, 1000, 5000}$, and the $y$-axis is the depth of the tree learned by ID3. Explain your observations. (20 points)
 
