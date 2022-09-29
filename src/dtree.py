@@ -42,7 +42,7 @@ class DecisionTree(Classifier):
         self.size = 1
         self.depth = 0
 
-    def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None) -> None:
+    def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None, research:bool = False) -> None:
         """
         This is the method where the training algorithm will run.
 
@@ -50,6 +50,7 @@ class DecisionTree(Classifier):
             X: The dataset. The shape is (n_examples, n_features).
             y: The labels. The shape is (n_examples,)
             weights: Weights for each example. Will become relevant later in the course, ignore for now.
+            research: will build the tree acoording to the research question instead of the normal way if true.
         """
         print(f"FITTING {len(X)} EXAMPLES WITH {len(self._schema)} ATTRIBUTES")
         if self.schema == []:
@@ -57,9 +58,75 @@ class DecisionTree(Classifier):
         else:
             # remove any 'id' attributes before starting
             possible_attributes = [i for i in range(len(self.schema)) if self.schema[i].name[-2:] != "id"]
-            self._build_tree(X, y, possible_attributes, self.root, 0)
+            if not research:
+                self._build_tree(X, y, possible_attributes, self.root, 0)
+            else:
+                self._build_tree_research(X, y, possible_attributes, self.root, 0)
 
     def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int) -> TreeNode:
+        """
+        Recursive method for considering partitions and building the tree.
+        Made after the ID3 algorithm.
+
+        Args:
+            X: The dataset. The shape is (n_examples, n_features).
+            y: The labels. The shape is (n_examples,)
+            possible_attributes: The list of the indices of the schema's features that are left to choose from at this node.
+            current_node: The TreeNode to be considered for a partition.
+            depth: a measure of how deep current_node is in the tree
+        """
+        print(f"CREATING NODE ON {len(X)} EXAMPLES (depth: {depth})", end='\r')
+        
+        if depth > self.depth:
+            self.depth = depth
+
+        if self._pure_node(y):
+            print("** Pure node, skipping **", end='\r')
+        elif possible_attributes == []:
+            print("** No more features, skipping **", end='\r')
+        elif depth == self.tree_depth_limit:
+            print("** At depth limit, skipping **", end='\r')
+        
+        if self._pure_node(y) or possible_attributes == [] or depth == self.tree_depth_limit:
+            self._make_majority_classifier(y, current_node)
+        else: # prepare to partition:
+            best_attribute_index, best_attribute_threshold = self._determine_split_criterion(X, y, possible_attributes)
+            if best_attribute_index == None: # ==> Max IG(X) = 0
+                self._make_majority_classifier(y, current_node)
+            else:
+                # create children and partition
+                if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
+                    # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
+                    # Continuous Partition procedure:
+                    print("Assigning node continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth (" + str(depth) + ") ", end="\r")
+                    current_node.attribute_index = best_attribute_index
+                    current_node.threshold = best_attribute_threshold
+
+                    child_one, child_two = TreeNode(), TreeNode()
+                    current_node.children.extend([child_one, child_two])
+                    self.size += 2
+                    
+                    # Partitioning for less than or equal to the threshold
+                    X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=True)
+                    self._build_tree(X_partition_leq, Y_partition_leq, possible_attributes, child_one, depth+1)
+                    # Partitioning for greater than the threshold
+                    X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=False)
+                    self._build_tree(X_partition_g, Y_partition_g, possible_attributes, child_two, depth+1)
+                else: 
+                    # Nominal Partition procedure:
+                    possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
+                    current_node.attribute_index = best_attribute_index
+                    print("Assigning node nominal attribute " + self.schema[best_attribute_index].name + " at depth (" + str(depth) + ")", end="\r")
+                    for value in self.schema[best_attribute_index].values:
+                        child = TreeNode()
+                        current_node.nominal_values.append(value)
+                        current_node.children.append(child)
+                        self.size += 1
+                        
+                        X_partition, Y_partition = self._partition_nominal(X, y, best_attribute_index, value)
+                        self._build_tree(X_partition, Y_partition, possible_attributes_updated, child, depth+1)
+
+    def _build_tree_research(self, X: np.ndarray, y: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int) -> TreeNode:
         """
         Recursive method for considering partitions and building the tree.
         Made after the ID3 algorithm.
@@ -359,7 +426,7 @@ def evaluate_and_print_metrics(dtree: DecisionTree, X: np.ndarray, y: np.ndarray
     print('First Feature:', dtree.schema[dtree.root.attribute_index].name, '\n')
 
 
-def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = True, information_gain: bool = True):
+def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = True, information_gain: bool = True, research: bool = False):
     """
     Create and train decision trees on data in a given folder.
 
@@ -368,6 +435,7 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
         tree_depth_limit: Depth limit of the decision tree
         use_cross_validation: If True, use cross validation. Otherwise, run on the full dataset.
         information_gain: If true, use information gain as the split criterion. Otherwise, use gain ratio.
+        research: If true, call the research functions (for part (d)) instead of the original, basic functions.
     """
 
     # last entry in the data_path is the file base (name of the dataset)
@@ -381,12 +449,20 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
     else:
         datasets = ((X, y, X, y),)
 
-    for X_train, y_train, X_test, y_test in datasets:
-        decision_tree = DecisionTree(schema,
-            tree_depth_limit=tree_depth_limit,
-            use_information_gain=information_gain)
-        decision_tree.fit(X_train, y_train)
-        evaluate_and_print_metrics(decision_tree, X_test, y_test)
+    if not research:
+        for X_train, y_train, X_test, y_test in datasets:
+            decision_tree = DecisionTree(schema,
+                    tree_depth_limit=tree_depth_limit,
+                    use_information_gain=information_gain)
+            decision_tree.fit(X_train, y_train)
+            evaluate_and_print_metrics(decision_tree, X_test, y_test)
+    else:
+        for X_train, y_train, X_test, y_test in datasets:
+            decision_tree = DecisionTree(schema,
+                tree_depth_limit=tree_depth_limit,
+                use_information_gain=information_gain)
+            decision_tree.fit(X_train, y_train, research)
+            evaluate_and_print_metrics(decision_tree, X_test, y_test)
 
 
 if __name__ == '__main__':
@@ -405,6 +481,8 @@ if __name__ == '__main__':
                         help='Disables cross validation and trains on the full dataset.')
     parser.add_argument('--use-gain-ratio', dest='gain_ratio', action='store_true',
                         help='Use gain ratio as tree split criterion instead of information gain.')
+    parser.add_argument('--research', dest='research', action='store_true',
+                        help='Enables the fit() and tree algo for the research question instead of running the normal fit/tree algo.')
     parser.set_defaults(cv=True, gain_ratio=False)
     args = parser.parse_args()
 
@@ -417,5 +495,6 @@ if __name__ == '__main__':
     tree_depth_limit = args.depth_limit
     use_cross_validation = args.cv
     use_information_gain = not args.gain_ratio
+    research = args.research
 
-    dtree(data_path, tree_depth_limit, use_cross_validation, use_information_gain)
+    dtree(data_path, tree_depth_limit, use_cross_validation, use_information_gain, research)
