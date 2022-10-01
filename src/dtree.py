@@ -1,5 +1,6 @@
 import argparse
 import os.path
+from queue import Empty
 import warnings
 
 from typing import Optional, List, Tuple
@@ -42,7 +43,8 @@ class DecisionTree(Classifier):
         self.size = 1
         self.depth = 0
 
-    def fit(self, X_train: np.ndarray, y_train: np.ndarray, weights: Optional[np.ndarray] = None, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, research:bool = False) -> None:
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, research:bool = False) -> None:
+        # weights: Optional[np.ndarray] = None, 
         """
         This is the method where the training algorithm will run.
 
@@ -61,7 +63,7 @@ class DecisionTree(Classifier):
             if not research:
                 self._build_tree(X_train, y_train, possible_attributes, self.root, 0)
             else:
-                if X_val == None:
+                if X_val is None:
                     raise argparse.ArgumentError("fit: X_val was not described for some reason");
                 self._build_tree_research(X_train, y_train, X_val, y_val, possible_attributes, self.root, 0)
 
@@ -128,7 +130,7 @@ class DecisionTree(Classifier):
                         X_partition, Y_partition = self._partition_nominal(X, y, best_attribute_index, value)
                         self._build_tree(X_partition, Y_partition, possible_attributes_updated, child, depth+1)
 
-    def _build_tree_research(self, X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int, temp_depth: Optional[int] = None) -> TreeNode:
+    def _build_tree_research(self, X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int, temp_depth:bool = None) -> TreeNode:
         """
         (Research Extension version)
         Recursive method for considering partitions and building the tree.
@@ -159,11 +161,11 @@ class DecisionTree(Classifier):
         if self._pure_node(y_train) or possible_attributes == [] or depth == self.tree_depth_limit or temp_depth == 0:
             self._make_majority_classifier(y_train, current_node)
         else: # prepare to choose a feature to partition on:
-            if depth+2 <= tree_depth_limit and temp_depth is None: # ==> there is room left to try the research procedure (and we are not on a temporary tree)
+            if depth+2 <= tree_depth_limit and temp_depth is None and len(X_val) != 0: # ==> there is room left to try the research procedure (and we are not on a temporary tree)
                 # The research procedure: we create three temporary trees of depth 2 on the 3 correspondingly highest features, to see if one outperforms the others.
                 # We choose one and proceed with it based on accuracy measurement (on val set)
                 information_measures, best_attribute_indices, best_attribute_thresholds = self._determine_split_criterion(X_train, y_train, possible_attributes, k_best=3)
-                if information_measures[0] == 0: # ==> Max IG(X) or Max GR(X) = 0
+                if information_measures[0] == 0 or information_measures == None: # ==> Max IG(X) or Max GR(X) = 0
                     self._make_majority_classifier(y_train, current_node)
                 else:
                     # This part will build a small temporary decision tree out to depth+2 starting with the top three features as the test on the current node, then choose the one with the highest accuracy on the validations set:
@@ -171,7 +173,6 @@ class DecisionTree(Classifier):
                     best_attribute_index_after_validation_testing = None
                     best_attribute_threshold_after_validation_testing = None
                     for information_measure, best_attribute_index, best_attribute_threshold in zip(information_measures, best_attribute_indices, best_attribute_thresholds):
-                        version_index += 1
                         if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
                             # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
                             # Continuous Partition procedure:
@@ -184,7 +185,7 @@ class DecisionTree(Classifier):
 
                             # Partitioning for less than or equal to the threshold
                             X_partition_leq, Y_partition_leq = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=True)
-                            self._build_tree_research(X_partition_leq, Y_partition_leq, possible_attributes, child_one, depth+1, temp_depth=1)
+                            self._build_tree_research(X_partition_leq, Y_partition_leq, X_val, y_val, possible_attributes, child_one, depth+1, temp_depth=1)
                             # Partitioning for greater than the threshold
                             X_partition_g, Y_partition_g = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=False)
                             self._build_tree_research(X_partition_g, Y_partition_g, X_val, y_val,possible_attributes, child_two, depth+1, temp_depth=1)
@@ -202,9 +203,9 @@ class DecisionTree(Classifier):
                                 X_partition, Y_partition = self._partition_nominal(X_train, y_train, best_attribute_index, value)
                                 self._build_tree_research(X_partition, Y_partition, X_val, y_val,possible_attributes_updated, child, depth+1, temp_depth = 1)
                         # Now calculating accuracy on validation set:
-                        y_hat = dtree.predict(X_val)
+                        y_hat = self.predict(X_val)
                         accuracy = util.accuracy(y_val, y_hat)
-                        if accuracy > max_accuracy:
+                        if accuracy >= max_accuracy:
                             max_accuracy = accuracy
                             best_attribute_index_after_validation_testing = best_attribute_index
                             best_attribute_threshold_after_validation_testing = best_attribute_threshold
@@ -265,7 +266,7 @@ class DecisionTree(Classifier):
                     self._build_tree_research(X_partition_leq, Y_partition_leq, X_val, y_val,possible_attributes, child_one, depth+1, temp_depth=0)
                     # Partitioning for greater than the threshold
                     X_partition_g, Y_partition_g = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=False)
-                    self._build_tree_research(X_partition_g, Y_partition_g, possible_attributes, X_val, y_val, child_two, depth+1, temp_depth=0)
+                    self._build_tree_research(X_partition_g, Y_partition_g, X_val, y_val, possible_attributes, child_two, depth+1, temp_depth=0)
                 else: 
                     # Nominal Partition procedure:
                     possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
@@ -280,7 +281,7 @@ class DecisionTree(Classifier):
                         X_partition, Y_partition = self._partition_nominal(X_train, y_train, best_attribute_index, value)
                         self._build_tree_research(X_partition, Y_partition, X_val, y_val,possible_attributes_updated, child, depth+1, temp_depth=0)
             else: 
-                # then, there's only one possible depth level left in the tree, so we don't run the research algorithm, we finish in the regular fashion:
+                # then, there's only one possible depth level left in the tree, or we're out of validation examples to get accuracy data on so we don't run the research algorithm, we finish in the regular fashion:
                 # thus, the validation set is now discarded
                 best_attribute_index, best_attribute_threshold = self._determine_split_criterion(X_train, y_train, possible_attributes)
                 # create children and partition
@@ -633,7 +634,7 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
             decision_tree = DecisionTree(schema,
                 tree_depth_limit=tree_depth_limit,
                 use_information_gain=information_gain)
-            decision_tree.fit(X_train, y_train, X_val, y_val, research)
+            decision_tree.fit(X_train, y_train, X_val, y_val, research=True)
             evaluate_and_print_metrics(decision_tree, X_test, y_test)
 
 
