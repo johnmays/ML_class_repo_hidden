@@ -131,4 +131,11 @@ Answer:
 11.	Show the decision boundaries learned by ID3 in Q10 for $N=50$ and $N=5000$ by generating an independent test set of size 100,000, plotting all the points and coloring them according to the predicted label from the $N=50$ and $N=5000$ trees. Explain what you see relative to the true decision boundary. What does this tell you about the suitability of trees for such datasets? (20 points)
 
 Answer:
+The 50 point decision boundary:
+<img src="/written_assignments/assets/HW2/50point_decision_boundary.png" width="400">
+
+The 5000 point decision boundary:
+<img src="/written_assignments/assets/HW2/5000point_decision_boundary.png" width="400">
+
+Even for $N=5000$, the decision boundary still appears as somewhat jagged.  The true decsion boundary should be a straight line.  What our ID3 did is certainly not bad, but a simple perceptron could do much better with a lot less work.  This indicates that, for datasets with a target concept that would be a linear decision boundary, trees are rather unsuitable.  In order for the decision boundary to get better, it would have to add more tests (which increases likelihood of overfitting and takes a lot more time), therefore another learning model would be preferable.
 
