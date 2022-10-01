@@ -42,7 +42,7 @@ class DecisionTree(Classifier):
         self.size = 1
         self.depth = 0
 
-    def fit(self, X: np.ndarray, y: np.ndarray, weights: Optional[np.ndarray] = None, research:bool = False) -> None:
+    def fit(self, X_train: np.ndarray, y_train: np.ndarray, weights: Optional[np.ndarray] = None, X_val: Optional[np.ndarray] = None, y_val: Optional[np.ndarray] = None, research:bool = False) -> None:
         """
         This is the method where the training algorithm will run.
 
@@ -52,16 +52,18 @@ class DecisionTree(Classifier):
             weights: Weights for each example. Will become relevant later in the course, ignore for now.
             research: will build the tree acoording to the research question instead of the normal way if true.
         """
-        print(f"FITTING {len(X)} EXAMPLES WITH {len(self._schema)} ATTRIBUTES")
+        print(f"FITTING {len(X_train)} EXAMPLES WITH {len(self._schema)} ATTRIBUTES")
         if self.schema == []:
-            self._make_majority_classifier(y, self.root)
+            self._make_majority_classifier(y_train, self.root)
         else:
             # remove any 'id' attributes before starting
             possible_attributes = [i for i in range(len(self.schema)) if self.schema[i].name[-2:] != "id"]
             if not research:
-                self._build_tree(X, y, possible_attributes, self.root, 0)
+                self._build_tree(X_train, y_train, possible_attributes, self.root, 0)
             else:
-                self._build_tree_research(X, y, possible_attributes, self.root, 0)
+                if X_val == None:
+                    raise argparse.ArgumentError("fit: X_val was not described for some reason");
+                self._build_tree_research(X_train, y_train, X_val, y_val, possible_attributes, self.root, 0)
 
     def _build_tree(self, X: np.ndarray, y: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int) -> TreeNode:
         """
@@ -69,8 +71,8 @@ class DecisionTree(Classifier):
         Made after the ID3 algorithm.
 
         Args:
-            X: The dataset. The shape is (n_examples, n_features).
-            y: The labels. The shape is (n_examples,)
+            X_train: The dataset. The shape is (n_examples, n_features).
+            y_train: The labels. The shape is (n_examples,)
             possible_attributes: The list of the indices of the schema's features that are left to choose from at this node.
             current_node: The TreeNode to be considered for a partition.
             depth: a measure of how deep current_node is in the tree
@@ -126,37 +128,126 @@ class DecisionTree(Classifier):
                         X_partition, Y_partition = self._partition_nominal(X, y, best_attribute_index, value)
                         self._build_tree(X_partition, Y_partition, possible_attributes_updated, child, depth+1)
 
-    def _build_tree_research(self, X: np.ndarray, y: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int) -> TreeNode:
+    def _build_tree_research(self, X_train: np.ndarray, y_train: np.ndarray, X_val: np.ndarray, y_val: np.ndarray, possible_attributes: List, current_node: TreeNode, depth: int, temp_depth: Optional[int] = None) -> TreeNode:
         """
+        (Research Extension version)
         Recursive method for considering partitions and building the tree.
-        Made after the ID3 algorithm.
+        Augmented ID3 algorithm.
 
         Args:
-            X: The dataset. The shape is (n_examples, n_features).
-            y: The labels. The shape is (n_examples,)
+            X_train: The training dataset. The shape is (n_examples, n_features).
+            y_train: The training labels. The shape is (n_examples,)
+            X_val: The validation dataset. The shape is (n_examples, n_features).
+            y_val: The validation labels. The shape is (n_examples,)
             possible_attributes: The list of the indices of the schema's features that are left to choose from at this node.
             current_node: The TreeNode to be considered for a partition.
             depth: a measure of how deep current_node is in the tree
+            temp_depth: an argument to determine if a temporary tree is being built, and how far to take it.
         """
-        print(f"CREATING NODE ON {len(X)} EXAMPLES (depth: {depth})", end='\r')
+        print(f"CREATING NODE ON {len(X_train)} EXAMPLES (depth: {depth})", end='\r')
         
         if depth > self.depth:
             self.depth = depth
 
-        if self._pure_node(y):
+        if self._pure_node(y_train):
             print("** Pure node, skipping **", end='\r')
         elif possible_attributes == []:
             print("** No more features, skipping **", end='\r')
         elif depth == self.tree_depth_limit:
             print("** At depth limit, skipping **", end='\r')
         
-        if self._pure_node(y) or possible_attributes == [] or depth == self.tree_depth_limit:
-            self._make_majority_classifier(y, current_node)
-        else: # prepare to partition:
-            best_attribute_index, best_attribute_threshold = self._determine_split_criterion(X, y, possible_attributes)
-            if best_attribute_index == None: # ==> Max IG(X) = 0
-                self._make_majority_classifier(y, current_node)
-            else:
+        if self._pure_node(y_train) or possible_attributes == [] or depth == self.tree_depth_limit or temp_depth == 0:
+            self._make_majority_classifier(y_train, current_node)
+        else: # prepare to choose a feature to partition on:
+            if depth+2 <= tree_depth_limit and temp_depth is None: # ==> there is room left to try the research procedure (and we are not on a temporary tree)
+                # The research procedure: we create three temporary trees of depth 2 on the 3 correspondingly highest features, to see if one outperforms the others.
+                # We choose one and proceed with it based on accuracy measurement (on val set)
+                information_measures, best_attribute_indices, best_attribute_thresholds = self._determine_split_criterion(X_train, y_train, possible_attributes, k_best=3)
+                if information_measures[0] == 0: # ==> Max IG(X) or Max GR(X) = 0
+                    self._make_majority_classifier(y_train, current_node)
+                else:
+                    # This part will build a small temporary decision tree out to depth+2 starting with the top three features as the test on the current node, then choose the one with the highest accuracy on the validations set:
+                    max_accuracy = 0
+                    best_attribute_index_after_validation_testing = None
+                    best_attribute_threshold_after_validation_testing = None
+                    for information_measure, best_attribute_index, best_attribute_threshold in zip(information_measures, best_attribute_indices, best_attribute_thresholds):
+                        version_index += 1
+                        if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
+                            # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
+                            # Continuous Partition procedure:
+                            current_node.attribute_index = best_attribute_index
+                            current_node.threshold = best_attribute_threshold
+
+                            child_one, child_two = TreeNode(), TreeNode()
+                            current_node.children = []
+                            current_node.children.extend([child_one, child_two])
+
+                            # Partitioning for less than or equal to the threshold
+                            X_partition_leq, Y_partition_leq = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=True)
+                            self._build_tree_research(X_partition_leq, Y_partition_leq, possible_attributes, child_one, depth+1, temp_depth=1)
+                            # Partitioning for greater than the threshold
+                            X_partition_g, Y_partition_g = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=False)
+                            self._build_tree_research(X_partition_g, Y_partition_g, X_val, y_val,possible_attributes, child_two, depth+1, temp_depth=1)
+                        else: 
+                            # Nominal Partition procedure:
+                            possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
+                            current_node.attribute_index = best_attribute_index
+                            current_node.threshold = None
+                            current_node.children = []
+                            current_node.nominal_values = []
+                            for value in self.schema[best_attribute_index].values:
+                                child = TreeNode()
+                                current_node.nominal_values.append(value)
+                                current_node.children.append(child)
+                                X_partition, Y_partition = self._partition_nominal(X_train, y_train, best_attribute_index, value)
+                                self._build_tree_research(X_partition, Y_partition, X_val, y_val,possible_attributes_updated, child, depth+1, temp_depth = 1)
+                        # Now calculating accuracy on validation set:
+                        y_hat = dtree.predict(X_val)
+                        accuracy = util.accuracy(y_val, y_hat)
+                        if accuracy > max_accuracy:
+                            max_accuracy = accuracy
+                            best_attribute_index_after_validation_testing = best_attribute_index
+                            best_attribute_threshold_after_validation_testing = best_attribute_threshold
+                            
+                    # Now that we know the best test, we will set the current_node to that test and call _build_tree_research again, with train and val sets partitioned on that test:
+                    if self.schema[best_attribute_index_after_validation_testing].ftype == FeatureType.CONTINUOUS:
+                        # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
+                        # Continuous Partition procedure:
+                        current_node.attribute_index = best_attribute_index_after_validation_testing
+                        current_node.threshold = best_attribute_threshold_after_validation_testing
+
+                        child_one, child_two = TreeNode(), TreeNode()
+                        current_node.children = []
+                        current_node.children.extend([child_one, child_two])
+                        self.size += 2
+
+                        # Partitioning for less than or equal to the threshold
+                        X_train_partition_leq, y_train_partition_leq = self._partition_continuous(X_train, y_train, best_attribute_index_after_validation_testing, best_attribute_threshold_after_validation_testing, leq=True)
+                        X_val_partition_leq, y_val_partition_leq = self._partition_continuous(X_val, y_val, best_attribute_index_after_validation_testing, best_attribute_threshold_after_validation_testing, leq=True)
+                        self._build_tree_research(X_train_partition_leq, y_train_partition_leq,X_val_partition_leq, y_val_partition_leq, possible_attributes, child_one, depth+1)
+                        # Partitioning for greater than the threshold
+                        X_train_partition_g, y_train_partition_g = self._partition_continuous(X_train, y_train, best_attribute_index_after_validation_testing, best_attribute_threshold_after_validation_testing, leq=False)
+                        X_val_partition_g, y_val_partition_g = self._partition_continuous(X_val, y_val, best_attribute_index_after_validation_testing, best_attribute_threshold_after_validation_testing, leq=False)
+                        self._build_tree_research(X_train_partition_g, y_train_partition_g,X_val_partition_g, y_val_partition_g, possible_attributes, child_one, depth+1)
+                    else: 
+                        # Nominal Partition procedure:
+                        possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index_after_validation_testing] # (removed feature from possible_attributes)
+                        current_node.attribute_index = best_attribute_index_after_validation_testing
+                        current_node.threshold = None
+                        current_node.children = []
+                        current_node.nominal_values = []
+                        for value in self.schema[best_attribute_index_after_validation_testing].values:
+                            self.size += 1
+                            child = TreeNode()
+                            current_node.nominal_values.append(value)
+                            current_node.children.append(child)
+                            X_train_partition, y_train_partition = self._partition_nominal(X_train, y_train, best_attribute_index_after_validation_testing, value)
+                            X_val_partition, y_val_partition = self._partition_nominal(X_val, y_val, best_attribute_index_after_validation_testing, value)
+                            self._build_tree_research(X_train_partition, y_train_partition, X_val_partition, y_val_partition, possible_attributes_updated, child, depth+1)
+                ### partition val set too
+            elif temp_depth is not None and temp_depth == 1:
+                # this is the case where we are building out the intermediate layer of a research tree
+                best_attribute_index, best_attribute_threshold = self._determine_split_criterion(X_train, y_train, possible_attributes)
                 # create children and partition
                 if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
                     # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
@@ -166,28 +257,65 @@ class DecisionTree(Classifier):
                     current_node.threshold = best_attribute_threshold
 
                     child_one, child_two = TreeNode(), TreeNode()
+                    current_node.children = []
+                    current_node.children.extend([child_one, child_two])
+                    
+                    # Partitioning for less than or equal to the threshold
+                    X_partition_leq, Y_partition_leq = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=True)
+                    self._build_tree_research(X_partition_leq, Y_partition_leq, X_val, y_val,possible_attributes, child_one, depth+1, temp_depth=0)
+                    # Partitioning for greater than the threshold
+                    X_partition_g, Y_partition_g = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=False)
+                    self._build_tree_research(X_partition_g, Y_partition_g, possible_attributes, X_val, y_val, child_two, depth+1, temp_depth=0)
+                else: 
+                    # Nominal Partition procedure:
+                    possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
+                    current_node.attribute_index = best_attribute_index
+                    current_node.children = []
+                    current_node.nominal_values = []
+                    for value in self.schema[best_attribute_index].values:
+                        child = TreeNode()
+                        current_node.nominal_values.append(value)
+                        current_node.children.append(child)
+                        
+                        X_partition, Y_partition = self._partition_nominal(X_train, y_train, best_attribute_index, value)
+                        self._build_tree_research(X_partition, Y_partition, X_val, y_val,possible_attributes_updated, child, depth+1, temp_depth=0)
+            else: 
+                # then, there's only one possible depth level left in the tree, so we don't run the research algorithm, we finish in the regular fashion:
+                # thus, the validation set is now discarded
+                best_attribute_index, best_attribute_threshold = self._determine_split_criterion(X_train, y_train, possible_attributes)
+                # create children and partition
+                if self.schema[best_attribute_index].ftype == FeatureType.CONTINUOUS:
+                    # Note: we do not update the possible attributes list here bc continuous tests may be made again on different thresholds.
+                    # Continuous Partition procedure:
+                    print("Assigning node continuous attribute " + self.schema[best_attribute_index].name + ", value " + str(best_attribute_threshold) + " at depth (" + str(depth) + ") ", end="\r")
+                    current_node.attribute_index = best_attribute_index
+                    current_node.threshold = best_attribute_threshold
+
+                    child_one, child_two = TreeNode(), TreeNode()
+                    current_node.children = []
                     current_node.children.extend([child_one, child_two])
                     self.size += 2
                     
                     # Partitioning for less than or equal to the threshold
-                    X_partition_leq, Y_partition_leq = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=True)
+                    X_partition_leq, Y_partition_leq = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=True)
                     self._build_tree(X_partition_leq, Y_partition_leq, possible_attributes, child_one, depth+1)
                     # Partitioning for greater than the threshold
-                    X_partition_g, Y_partition_g = self._partition_continuous(X, y, best_attribute_index, best_attribute_threshold, leq=False)
+                    X_partition_g, Y_partition_g = self._partition_continuous(X_train, y_train, best_attribute_index, best_attribute_threshold, leq=False)
                     self._build_tree(X_partition_g, Y_partition_g, possible_attributes, child_two, depth+1)
                 else: 
                     # Nominal Partition procedure:
                     possible_attributes_updated = [i for i in possible_attributes if i != best_attribute_index] # (removed feature from possible_attributes)
                     current_node.attribute_index = best_attribute_index
-                    print("Assigning node nominal attribute " + self.schema[best_attribute_index].name + " at depth (" + str(depth) + ")", end="\r")
+                    current_node.children = []
+                    current_node.nominal_values = []
                     for value in self.schema[best_attribute_index].values:
                         child = TreeNode()
                         current_node.nominal_values.append(value)
                         current_node.children.append(child)
                         self.size += 1
                         
-                        X_partition, Y_partition = self._partition_nominal(X, y, best_attribute_index, value)
-                        self._build_tree(X_partition, Y_partition, possible_attributes_updated, child, depth+1)
+                        X_partition, Y_partition = self._partition_nominal(X_train, y_train, best_attribute_index, value)
+                        self._build_tree(X_partition, Y_partition, possible_attributes_updated, child, depth+1,)
 
     def _make_majority_classifier(self, y: np.ndarray, node: TreeNode) -> TreeNode:
         """
@@ -305,18 +433,29 @@ class DecisionTree(Classifier):
         """
         return self._schema
 
-    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray, possible_attributes: np.ndarray) -> Tuple[int, float]:
+    def _determine_split_criterion(self, X: np.ndarray, y: np.ndarray, possible_attributes: np.ndarray, k_best: Optional[int]=None) -> Tuple[int, float]:
         """
         Args:
             X: The dataset. The shape is (n_examples, n_features).
             y: The labels. The shape is (n_examples,)
             possible_attributes: The list of the indices of the schema's features that are left to choose from at this node.
+            k_best: How many of the top attribute indices to return.  If this is given, instead of None, this implies that it is being called from a research function  
 
-        Returns: best_attribute_index, the schema index of the best possible attribute by the given metric, and best_threshold, a corresponding threshold value for that attribute if it is continuous (= None otherwise).
+        Returns: best_attribute_index, the schema index of the best possible attribute by the given metric, and best_threshold, a corresponding threshold value for that attribute if it is continuous (= None otherwise).  Could be arrays of top several if k_best != None (research extension).
         """
+        # A boolean to signify whether or not this is for the research extension or not
+        
         max_information_measure = 0
         best_attribute_index = None
         best_threshold = None
+
+        # (for research extension) setting this function up to return top few attributes in an array instead of the single best:  
+        research = False
+        if k_best is not None:
+            research = True
+            max_information_measure = []
+            best_attribute_index = []
+            best_threshold = []
 
         H_y = util.entropy(y)
 
@@ -327,46 +466,77 @@ class DecisionTree(Classifier):
                 dividers = self._find_thresholds_2(X[:, index], y)
                 print(f"Attribute {feature.name} has {len(dividers)} potential thresholds", end='\r')
                 
-                b = 0
+                best_information_measure_per_attribute = 0
 
                 for div in dividers:
                     if self.use_information_gain:
                         current_IG = H_y - util.conditional_entropy(X, y, index, div)
-                        if current_IG > max_information_measure:
-                            max_information_measure = current_IG
-                            best_attribute_index = index
-                            best_threshold = div
-                        if current_IG > b:
-                            b = current_IG
+                        if not research:
+                            if current_IG > max_information_measure:
+                                max_information_measure = current_IG
+                                best_attribute_index = index
+                                best_threshold = div
+                        else:
+                            max_information_measure.append(current_IG)
+                            best_attribute_index.append(index)
+                            best_threshold.append(div)
+                        if current_IG > best_information_measure_per_attribute:
+                            best_information_measure_per_attribute = current_IG
                     else:
                         current_GR = (H_y - util.conditional_entropy(X, y, index, div)) / util.attribute_entropy(X, index, div)
-                        if current_GR > max_information_measure:
-                            max_information_measure = current_GR
-                            best_attribute_index = index
-                            best_threshold = div
-                        if current_GR > b:
-                            b = current_GR
+                        if not research:
+                            if current_GR > max_information_measure:
+                                max_information_measure = current_GR
+                                best_attribute_index = index
+                                best_threshold = div
+                        else:
+                            max_information_measure.append(current_GR)
+                            best_attribute_index.append(index)
+                            best_threshold.append(div)
+                        if current_GR > best_information_measure_per_attribute:
+                            best_information_measure_per_attribute = current_GR
                 
                 if self.use_information_gain:
-                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {b}", end="\r")
+                    print(f"Checked continuous attribute {feature.name} ({index})...    IG = {best_information_measure_per_attribute}", end="\r")
                 else:
-                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {b}", end="\r")
+                    print(f"Checked continuous attribute {feature.name} ({index})...    GR = {best_information_measure_per_attribute}", end="\r")
 
             else:
                 if self.use_information_gain:
                     current_IG = H_y - util.conditional_entropy(X, y, index, None)
                     print(f"Checking nominal attribute {feature.name} ({index})...    IG = {current_IG}", end="\r")
-                    if current_IG > max_information_measure:
-                        max_information_measure = current_IG
-                        best_attribute_index = index
+                    if not research:
+                        if current_IG > max_information_measure:
+                            max_information_measure = current_IG
+                            best_attribute_index = index
+                    else:
+                        max_information_measure.append(current_IG)
+                        best_attribute_index.append(index)
+                        best_threshold.append(None)
                 else:
                     current_GR = (H_y - util.conditional_entropy(X, y, index, None)) / util.attribute_entropy(X, index, None)
                     print(f"Checking nominal attribute {feature.name} ({index})...    GR = {current_GR}", end="\r")
-                    if current_GR > max_information_measure:
-                        max_information_measure = current_GR
-                        best_attribute_index = index
-        
-        return best_attribute_index, best_threshold
+                    if not research:
+                        if current_GR > max_information_measure:
+                            max_information_measure = current_GR
+                            best_attribute_index = index
+                    else:
+                        max_information_measure.append(current_GR)
+                        best_attribute_index.append(index)
+                        best_threshold.append(None)
+        if research:
+            # how to pick the top k_best out of the constructed arrays:
+            zipped = zip(max_information_measure, best_attribute_index, best_threshold)
+            zipped = list(zipped)
+            sorted_zipped = sorted(zipped, key = lambda x: x[0], reverse=True)
+            last_index = min(k_best, len(possible_attributes)) # for picking top k_best unless there are less possible attributes than k_best
+            max_information_measure, best_attribute_index, best_threshold = list(zip(*sorted_zipped[0:last_index]))
+            max_information_measure = list(max_information_measure)
+            best_attribute_index = list(best_attribute_index)
+            best_threshold = list(best_threshold)
+            return max_information_measure, best_attribute_index, best_threshold
+        else:
+            return best_attribute_index, best_threshold
 
     def _find_thresholds(self, values: np.ndarray) -> np.ndarray:
         """
@@ -458,10 +628,12 @@ def dtree(data_path: str, tree_depth_limit: int, use_cross_validation: bool = Tr
             evaluate_and_print_metrics(decision_tree, X_test, y_test)
     else:
         for X_train, y_train, X_test, y_test in datasets:
+            # Creating a validation set from the training set by using cv_split
+            X_train, y_train, X_val, y_val = util.cv_split(X_train, y_train, folds=5, stratified=True)[0]  
             decision_tree = DecisionTree(schema,
                 tree_depth_limit=tree_depth_limit,
                 use_information_gain=information_gain)
-            decision_tree.fit(X_train, y_train, research)
+            decision_tree.fit(X_train, y_train, X_val, y_val, research)
             evaluate_and_print_metrics(decision_tree, X_test, y_test)
 
 
