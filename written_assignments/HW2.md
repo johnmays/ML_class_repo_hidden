@@ -128,14 +128,21 @@ The local optima of bounded range will only exist inside the range or on the bou
 
 Answer: 
 
+<img src="/written_assignments/assets/HW2/Q10_N_depth.png" width="400">
+
+Most generally speaking, as $N$ increases, so does the depth of the tree.  Approximately, this relationship is logarithmic, as is to be expected from a tree.  However, there probably aren't enough data points to truly demonstrate this relationship.  This makes intuitive sense as well, for the more data points there are, the more thresholds there are available to be partitioned on, therefore the decision boundary gets finer and finer, implying more tests and therefore greater tree depth.  However, as the tree gets wider,the average partition size at a depth level will decrease, which explains why this relationship is better described by a function with decresasing growth (like the logarithm) rather than a linear function.
+
 11.	Show the decision boundaries learned by ID3 in Q10 for $N=50$ and $N=5000$ by generating an independent test set of size 100,000, plotting all the points and coloring them according to the predicted label from the $N=50$ and $N=5000$ trees. Explain what you see relative to the true decision boundary. What does this tell you about the suitability of trees for such datasets? (20 points)
 
 Answer:
+
 The 50 point decision boundary:
+
 <img src="/written_assignments/assets/HW2/50point_decision_boundary.png" width="400">
 
 The 5000 point decision boundary:
+
 <img src="/written_assignments/assets/HW2/5000point_decision_boundary.png" width="400">
 
-Even for $N=5000$, the decision boundary still appears as somewhat jagged.  The true decsion boundary should be a straight line.  What our ID3 did is certainly not bad, but a simple perceptron could do much better with a lot less work.  This indicates that, for datasets with a target concept that would be a linear decision boundary, trees are rather unsuitable.  In order for the decision boundary to get better, it would have to add more tests (which increases likelihood of overfitting and takes a lot more time), therefore another learning model would be preferable.
+The decision boundary becomes finer as $N$ increases.  Howeverm, even for $N=5000$, the decision boundary still appears as somewhat jagged.  The true decsion boundary should be a straight line.  What our ID3 did is certainly not bad, but a simple perceptron could do much better with a lot less work.  This indicates that, for datasets with a target concept that would be a linear decision boundary, trees are rather unsuitable.  In order for the decision boundary to get better, it would have to add more and more tests (which increases likelihood of overfitting and takes a lot more time), therefore another learning model would be preferable.
 
