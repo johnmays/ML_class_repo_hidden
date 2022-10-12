@@ -32,5 +32,24 @@ Answer:
 
 17.	Prove that the ROC graph of a random classifier that ignores attributes and guesses each class with equal probability is a diagonal line. (10 points)
 
-Answer: 
+Answer: For any example, the random classifier would have a 50% chance of classifying it as positive and a 50% chance of classifying as negative. Suppose that we give the random classifier a set of examples $S$ containing $p$ positive examples and $n$ negative examples. The number of true positives $TP$ and true negatives $TN$ are essentially determined by binomial distributions with $p$ and $n$ trials respectively, and each with success probability 0.5. The expectation of the binomial distribution is $(num trials * success prob)$, so this means that:
+- The expected number of true positives $E(TP) = p/2$.
+- The expected number of true negatives $E(TN) = n/2$.
+- Likewise, the expected number of false negatives $E(FN) = p - E(TP) = p/2$.
+- The expected number of false positives $E(FP) = n - E(FP) = n/2$.
+
+The true positive rate $\frac{TP}{TP + FN}$ is therefore $\frac{p/2}{p/2 + p/2} = \frac{1}{2}$, and the false positive rate $\frac{FP}{FP + TN}$ is $\frac{n/2}{n/2 + n/2} = \frac{1}{2}$. The position on the ROC curve is (0.5, 0.5)-- right on the diagonal line.
+
+If the random classifier uses confidences (i.e. assigns every example a confidence sampled from the linear distribution across [0, 1]), then the ROC position will still always be on the diagonal line. Use the same terminology from the last proof. If the positive-classification threshold for the classifier is $t \in [0, 1]$, then the same logic about binomial distributions still applies, but the success rate for $TP$ is $1 - t$, and the success rate for $TN$ is $t$. Therefore:
+- The expected number of true positives $E(TP) = p * (1 - t)$.
+- The expected number of true negatives $E(TN) = n * t$.
+- The expected number of false negatives $E(FN) = p * t$.
+- The expected number of false positives $E(FP) = n * (1 - t)$.
+
+The true positive rate is $\frac{TP}{TP + FN} = \frac{p(1-t)}{p(1-t)+p(t)} = \frac{p(1-t)}{p} = (1-t)$
+
+And the false positive rate is $\frac{FP}{FP + TN} = \frac{n(1-t)}{n(1-t)+n(t)} = \frac{n(1-t)}{n} = (1-t)$.
+
+Therefore, the ROC position of this classifier is (1-t, 1-t), where $t$ is the threshold– always on the diagonal line.
+
 
