@@ -2,6 +2,8 @@
 
 Names and github IDs (if your github ID is not your name or Case ID):
 
+John Mays, James McHargue, Zaichuan You
+
 12.	Under what circumstances might it be beneficial to overfit? (10 points)
 
 Answer:
