@@ -6,7 +6,9 @@ John Mays, James McHargue, Zaichuan You
 
 12.	Under what circumstances might it be beneficial to overfit? (10 points)
 
-Answer:
+Answer:Overfitting is an action where the model has a lower performance on test sets and has high performance on learning sets. In this case the model is memorizing the train set instead of learning it. 
+The only circumstance which we want to overfit is when our training data is good enough. When we know that our training data set is good enough and contains all possible information that a future input may have, we will expect our model to overfit on this set of training examples. Example of this could be a library system. When you want to have a model which inputs the book and outputs the location of the book. Because there are only a limited number of books and when newer versions of books come in they will be put exactly where the old ones are. In this case memorizing the input examples would have a positive effect on future performance.
+
 
 13.	Restriction biases of learning algorithms prevent overfitting by restricting the hypothesis space, while preference biases prevent overfitting by preferring simpler concepts but not necessarily restricting the hypothesis space. Discuss the pros and cons of preference vs restriction biases. (10 points)
 
