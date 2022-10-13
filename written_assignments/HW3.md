@@ -40,7 +40,7 @@ This is guranteed.
 
 **Proof:**  
 
-There are a fixed number of actually positive examples, $P$.  The sets of $TP$ and $FN$ are two mutually disjoint subsets of $P$ that constitute $P$ entirely.  Therefore, if $TP$ increases by a number of examples, $FP$ decreases by the same amount.  $TN$ and $FP$ have an equivalent realtionship as subsets of $N$.
+There are a fixed number of actually positive examples, $P$.  The sets of $TP$ and $FN$ are two mutually disjoint subsets of $P$ that constitute $P$ entirely.  Therefore, if $TP$ increases by a number of examples, $FP$ decreases by the same amount.  $TN$ and $FN$ have an equivalent realtionship as subsets of $N$.
 
 Recall that $TPR = \frac{TP}{P}$ and $FPR = \frac{FP}{N}$
 
