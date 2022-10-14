@@ -29,6 +29,18 @@ Additionally, because the testing set is randomly sampled for each iteration, th
 
 Answer: 
 
+$P$ and $N$ are constant.  
+
+For a given $FPR$, $TPR_A \geq TPR_B$.  This means that $ROC_A$ is always above or on $ROC_B$.  Because ROC curves increases monotonically (**see 17**), this also means that $ROC_A$ is on or to the left of $ROC_B$ on the entire domain.  In other words, for a given $TPR$, $FPR_A \leq FPR_B$.  
+
+This, plus the fact that $TPR=\frac{TP}{P} \implies$ for a given $TP$, $FP_A \leq FP_B$.  
+
+On a precision recall graph, recall ( $TPR$ ) is on the x-axis.  Take a point on the x-axis (a given $TPR$ ).  At this point, we obviously know that $TP_A = TP_B$.  We also know that $FP_A \leq FP_B,$ which implies that $Pr_{A}=\frac{TP}{TP+FP_A}$ must be greater than or equal to $\frac{TP}{TP+FP_B}=Pr_{B}$.
+
+This is true for every recall value on the x-axis.
+
+Therefore, if the ROC curve of A "dominates" the ROC curve of B, the precision-recall graph of A "dominates" that of B (has precision greater than or equal to that of B at all recall values).
+
 16.	Prove that an ROC graph must be monotonically increasing. (10 points)
 
 Answer:
