@@ -22,7 +22,7 @@ Restriction bias:\
 \
 Preference bias:\
 	Pros: Could perform search in a complete hypothesis space that contains unknown target function. Build a network based on our beliefs (The way of learning which we are most confident about the networks’ performance).\
-	Cons: Highly dependent on our preference, if we have wrong preference then very likely the model will learn in a space which does not contain the good solutions.\
+	Cons: Highly dependent on our preference, if we have wrong preference then very likely the model will learn in a space which does not contain the good solutions.
 
 
 14.	Person X wishes to evaluate the performance of a learning algorithm on a set of $n$ examples ( $n$ large). X employs the following strategy:  Divide the $n$ examples randomly into two equal-sized disjoint sets, A and B. Then train the algorithm on A and evaluate it on B. Repeat the previous two steps for $N$ iterations ( $N$ large), then average the $N$ performance measures obtained. Is this sound empirical methodology? Explain why or why not. (10 points)
