@@ -15,7 +15,15 @@ Another case could be when our deployment environment is largely different from 
 
 13.	Restriction biases of learning algorithms prevent overfitting by restricting the hypothesis space, while preference biases prevent overfitting by preferring simpler concepts but not necessarily restricting the hypothesis space. Discuss the pros and cons of preference vs restriction biases. (10 points)
 
-Answer:
+Answer:\
+Restriction bias:\
+	Pros: Bias intensity leads to limited hypothesis space and will save our learning time since we do not need to search the entire hypothesis space. Limited hypothesis space will create the specific type of concept which we want to learn.\
+	Cons: Since restriction bias performs search in limited hypothesis space, it is very likely to rule out the target function, also some better solution may be ruled out.\
+\
+Preference bias:\
+	Pros: Could perform search in a complete hypothesis space that contains unknown target function. Build a network based on our beliefs (The way of learning which we are most confident about the networks’ performance).\
+	Cons: Highly dependent on our preference, if we have wrong preference then very likely the model will learn in a space which does not contain the good solutions.\
+
 
 14.	Person X wishes to evaluate the performance of a learning algorithm on a set of $n$ examples ( $n$ large). X employs the following strategy:  Divide the $n$ examples randomly into two equal-sized disjoint sets, A and B. Then train the algorithm on A and evaluate it on B. Repeat the previous two steps for $N$ iterations ( $N$ large), then average the $N$ performance measures obtained. Is this sound empirical methodology? Explain why or why not. (10 points)
 
