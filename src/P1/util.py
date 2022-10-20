@@ -375,16 +375,31 @@ def accuracy(y: np.ndarray, y_hat: np.ndarray) -> float:
     Returns: Accuracy
     """
 
-    if len(y) != len(y_hat):
-        raise ValueError('y and y_hat must be the same shape/size!')
-
     n = len(y)
+
+    if n != len(y_hat):
+        raise ValueError('y and y_hat must be the same shape/size!')
 
     return (y == y_hat).sum() / n
 
 
 def precision(y: np.ndarray, y_hat: np.ndarray) -> float:
-    raise NotImplementedError()
+    """
+    Returns the precision  between a true results array and a predicted array.
+
+    Args:
+        y: True labels.
+        y_hat: Predicted labels.
+
+    Returns: Precision 
+    """
+
+    n = len(y)
+    
+    if n != len(y_hat):
+        raise ValueError('y and y_hat must be the same shape/size!')
+
+    return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==1)).sum())
 
 
 def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
