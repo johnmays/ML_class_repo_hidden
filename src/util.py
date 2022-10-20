@@ -403,7 +403,22 @@ def precision(y: np.ndarray, y_hat: np.ndarray) -> float:
 
 
 def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
-    raise NotImplementedError()
+    """
+    Returns the recall between a true results array and a predicted array.
+
+    Args:
+        y: True labels.
+        y_hat: Predicted labels.
+
+    Returns: Recall 
+    """
+
+    n = len(y)
+    
+    if n != len(y_hat):
+        raise ValueError('y and y_hat must be the same shape/size!')
+
+    return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==0)).sum())
 
 
 def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
