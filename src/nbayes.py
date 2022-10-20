@@ -1,11 +1,15 @@
 import argparse
 import numpy as np
+from typing import List
 
 from sting.classifier import Classifier
 from sting.data import Feature, FeatureType, parse_c45
 
 class NaiveBayes(Classifier):
-    def __init__(self, numbins, m) -> None:
+    def __init__(self, schema: List[Feature], numbins: int, m: int) -> None:
+        self.schema = schema
+        self.num_bins = numbins
+        self.ess = m
         pass
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> None:
