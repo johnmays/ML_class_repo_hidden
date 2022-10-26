@@ -132,7 +132,7 @@ def nbayes(data_path: str, num_bins: int, m: int, use_cross_validation: bool = T
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run a decision tree algorithm.')
+    parser = argparse.ArgumentParser(description='Run a Naive Bayse algorithm.')
     parser.add_argument('path', metavar='PATH', type=str, help='The path to the data.')
     parser.add_argument('numbins', metavar='BINS', type=int,
                         help='The number of bins to create for any continuous attribute.')

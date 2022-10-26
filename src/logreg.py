@@ -1,11 +1,13 @@
 import argparse
 import numpy as np
+import math
 
 from sting.classifier import Classifier
 from sting.data import Feature, FeatureType, parse_c45
 
 class LogReg(Classifier):
     def __init__(self, lamb) -> None:
+        self.lamb = lamb
         pass
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> None:
@@ -13,6 +15,12 @@ class LogReg(Classifier):
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         pass
+    
+    def gradient_w(self, W: np.ndarray, X: np.ndarray, B: np.ndarray):
+        return X/(1+math.e**(-W*X+B))+self.lamb*W
+    
+    def gradient_b(self, W: np.ndarray, X: np.ndarray, B: np.ndarray):
+        return -1/(1+math.e**(-W*X+B))
 
 
 def evaluate_and_print_metrics(logreg: LogReg, X: np.ndarray, y: np.ndarray):
@@ -20,7 +28,7 @@ def evaluate_and_print_metrics(logreg: LogReg, X: np.ndarray, y: np.ndarray):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Run a decision tree algorithm.')
+    parser = argparse.ArgumentParser(description='Run a Logistic regression algorithm.')
     parser.add_argument('path', metavar='PATH', type=str, help='The path to the data.')
     parser.add_argument('lamb', metavar='LAMBDA', type=float,
                         help='The weight decay coefficient.')
