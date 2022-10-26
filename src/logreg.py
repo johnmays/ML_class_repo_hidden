@@ -17,10 +17,16 @@ class LogReg(Classifier):
         pass
     
     def gradient_w(self, W: np.ndarray, X: np.ndarray, B: np.ndarray):
-        return X/(1+math.e**(-W*X+B))+self.lamb*W
+        #The partial derivative of the function respect to W
+        return X/(1+math.e**(-np.sum(W*X)+B))+self.lamb*W
     
     def gradient_b(self, W: np.ndarray, X: np.ndarray, B: np.ndarray):
-        return -1/(1+math.e**(-W*X+B))
+        #The partial derivative of the function respect to B
+        return -1/(1+math.e**(-np.sum(W*X)+B))
+    
+    def logistic_reg(self, W: np.ndarray, X: np.ndarray, B: np.ndarray):
+        #The logistic regression equation
+        return 1/(1+math.e**(-(np.sum(W*X)+B)))
 
 
 def evaluate_and_print_metrics(logreg: LogReg, X: np.ndarray, y: np.ndarray):
