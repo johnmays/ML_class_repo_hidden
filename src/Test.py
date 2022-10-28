@@ -18,6 +18,7 @@ print(X[0])"""
 np.random.seed(300)
 
 W = np.random.randn(len(X[0]),)+1
+print(W)
 B = np.random.randn()
 log = LogReg(0.01, W, B, 0.1)
 costs = []
@@ -26,8 +27,8 @@ for i in range(0, 100):
     for example in range(0, len(y)):
         gradient_w = log.gradient_w(X[example])
         gradient_b = log.gradient_b(X[example])
-        #log.W = log.W-(log.logistic_reg(X[example])-y[example])*log.rate*gradient_w
-        #log.B = log.B-(log.logistic_reg(X[example])-y[example])*log.rate*gradient_b
+        #log.W = log.W-X[example]*(log.logistic_reg(X[example])-y[example])*log.rate*gradient_w
+        #log.B = log.B-X[example]*(log.logistic_reg(X[example])-y[example])*log.rate*gradient_b
         log.W = log.W-log.rate*gradient_w
         log.B = log.B-log.rate*gradient_b
 

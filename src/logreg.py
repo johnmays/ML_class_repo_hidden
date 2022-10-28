@@ -48,10 +48,10 @@ class LogReg(Classifier):
         #The logistic regression equation
         return 1/(1+np.exp(-(np.sum(W*X)+B)))
     
-    def cost(self, X):
+    def cost(self, X, y):
         W = self.W
         B = self.B
-        return -np.log(1-(1/(1+np.exp(-np.sum(W*X)+B)))) + self.lamb/2*LA.norm(W**2)
+        return -y * np.log(1/(1+np.exp(-np.sum(W*X)+B))) - (1-y) * np.log(1-(1/(1+np.exp(-np.sum(W*X)+B)))) + self.lamb/2*LA.norm(W**2)
 
 
 def evaluate_and_print_metrics(logreg: LogReg, X: np.ndarray, y: np.ndarray):
