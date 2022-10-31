@@ -8,8 +8,6 @@ from sting.data import Feature, FeatureType, parse_c45
 
 
 class LogReg(Classifier):
-    W = None
-    B = None
     def __init__(self, lamb, W, B, rate) -> None:
         self.lamb = lamb
         self.W = W
@@ -35,7 +33,7 @@ class LogReg(Classifier):
         W = self.W
         B = self.B
         #The logistic regression equation
-        return 1/(1+np.exp(-(np.sum(W*X))+B))
+        return 1/(1+np.exp(-(np.sum(W*X)+B)))
     
     def gradient_w(self, X, y):
         W = self.W
@@ -52,13 +50,8 @@ class LogReg(Classifier):
         W = self.W
         B = self.B
         lamb = self.lamb
-        return np.sum(-y * np.log(1/(1+np.exp(-(np.sum(X*W, axis=1))+B))) - (1-y) *np.log(1-(1/(1+np.exp(-(np.sum(X*W, axis=1))+B)))) + lamb/2*LA.norm(W)**2)
+        return np.sum(-y * np.log(1/(1+np.exp(-(np.sum(X*W, axis=1)+B)))) - (1-y) *np.log(1-(1/(1+np.exp(-(np.sum(X*W, axis=1)+B))))) + lamb/2*LA.norm(W)**2)
 
-    def update_W(self, gradient_w):
-        self.W = self.W - gradient_w
-    
-    def update_B(self, gradient_B):
-        self.B = self.B - gradient_B
 
 def evaluate_and_print_metrics(logreg: LogReg, X: np.ndarray, y: np.ndarray):
     pass

@@ -1,14 +1,14 @@
 from sting.classifier import Classifier
 from sting.data import Feature, FeatureType, parse_c45
 import os
-from logreg import LogReg
+from logreg_rethink import LogReg
 import numpy as np
 import util
 from sklearn.linear_model import LogisticRegression
 
 
 # last entry in the data_path is the file base (name of the dataset)
-path = os.path.expanduser("C:\\Users\\21995\\Desktop\\Computer Science\\CSDS 440\\Programming\\440data\\voting").split(os.sep)
+path = os.path.expanduser("C:\\Users\\21995\\Desktop\\Computer Science\\CSDS 440\\Programming\\440data\\volcanoes").split(os.sep)
 file_base = path[-1]  # -1 accesses the last entry of an iterable in Python
 root_dir = os.sep.join(path[:-1])
 schema, X, y = parse_c45(file_base, root_dir)
@@ -32,8 +32,8 @@ for i in range(0, 200):
         gradient_b = log.gradient_b(X[example], y[example])
         #print(f"old W:{log.W}, old B:{log.B}")
         #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
-        log.update_W(log.rate*gradient_w)
-        log.update_B(log.rate*gradient_b)
+        log.W = log.W - (log.rate*gradient_w)
+        log.B = log.B - (log.rate*gradient_b)
         #print(f"new W:{log.W}, new B:{log.B}")
 
 print(log.W)
