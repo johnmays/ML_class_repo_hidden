@@ -18,9 +18,7 @@ class LogReg(Classifier):
     def fit(self, X: np.ndarray, y: np.ndarray, epoch: int) -> None:
         self.W = np.random.randn(len(X[0]),)+1
         self.B = np.random.randn()
-        costs = []
         for i in range(0, epoch):
-            costs.append(self.cost(X, y))
             for example in range(0, len(y)):
                 #X_temp = X[example].copy()
                 gradient_w = self.gradient_w(X[example], y[example])
@@ -30,7 +28,6 @@ class LogReg(Classifier):
                 self.W = self.W - (self.rate*gradient_w)
                 self.B = self.B - (self.rate*gradient_b)
                 #print(f"new W:{log.W}, new B:{log.B}")
-        return costs
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         W = self.W
@@ -41,7 +38,8 @@ class LogReg(Classifier):
                 prediction[a] = 1
             else:
                 prediction[a] = 0
-        return prediction
+        confidences = np.sum(W * X, axis=1)+B
+        return prediction, confidences
     
     def sigmoid(self, X):
         W = self.W
@@ -67,11 +65,36 @@ class LogReg(Classifier):
         return np.sum(-y * np.log(1/(1+np.exp(-(np.sum(X*W, axis=1)+B)))) - (1-y) *np.log(1-(1/(1+np.exp(-(np.sum(X*W, axis=1)+B))))) + lamb/2*LA.norm(W)**2)
 
 
-def evaluate_and_print_metrics(logreg: LogReg, X: np.ndarray, y: np.ndarray):
-    costs = logreg.fit(X, y, 100)
-    acc = util.accuracy(y, logreg.predict(X))
+def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: np.ndarray):
+    """
+    Print information about the performance of the naive Bayes classifier on testing data.
+
+    Args:
+        nb: the Logistic regression classifier to evaluate.
+        X: An array of examples to use for evaluation.
+        y: An array of class labels associated with the examples in X.
+    """
+
+    acc, precision, recall = [], [], []
+    for i in range(len(ys)):
+        acc.append(util.accuracy(ys[i], y_hats[i]))
+        precision.append(util.precision(ys[i], y_hats[i]))
+        recall.append(util.recall(ys[i], y_hats[i]))
+
+    all_ys, all_confidences = [], []
+    for y in ys:
+        all_ys.extend(y)
+    for c in confidences:
+        all_confidences.extend(c)
+    
+    print(f"{len(all_confidences)} ROC points")
+    auc = util.auc(all_ys, all_confidences)
+
     print("\n***********\n* RESULTS *\n***********")
-    print(f'Accuracy:{acc:.2f}')
+    print(f'Accuracy: {np.mean(acc):.3f} {np.var(acc):.3f}')
+    print(f'Precision: {np.mean(precision):.3f} {np.var(precision):.3f}')
+    print(f'Recall: {np.mean(recall):.3f} {np.var(recall):.3f}')
+    print(f'AUR: {auc:.3f}\n')
 
 def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = True):
     # last entry in the data_path is the file base (name of the dataset)
@@ -81,14 +104,23 @@ def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = Tr
     schema, X, y = parse_c45(file_base, root_dir)
 
     if use_cross_validation:
-        datasets = util.cv_split(X, y, folds=5, stratified=True)
+        datasets = util.cv_split(X, y, folds=5, stratified=False)
     else:
         datasets = ((X, y, X, y),)
     
+    ys, y_hats, confidences = [], [], []
     for X_train, y_train, X_test, y_test in datasets:
         classifier = LogReg(lamb, rate)
         classifier.fit(X_train, y_train, 100)
-        evaluate_and_print_metrics(classifier, X_test, y_test)
+
+        y_hat, confidence = classifier.predict(X_test)
+        ys.append(y_test)
+        y_hats.append(y_hat)
+        confidences.append(confidence)
+    
+    print(ys, y_hats)
+    print("Evaluating...")
+    evaluate_and_print_metrics(ys, y_hats, confidences)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run a Logistic regression algorithm.')
