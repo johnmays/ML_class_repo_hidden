@@ -33,6 +33,7 @@ class NaiveBayes(Classifier):
 
         # Calculate smoothed conditional probabilities
         for index in range(len(self.schema)):
+            print(f"Fitting feature {index+1}/{len(self.schema)}", end='\r')
             feature = self.schema[index]
             parameters = self.model[index]
             examples = np.array(X[:, index])
@@ -58,6 +59,7 @@ class NaiveBayes(Classifier):
             for b in range(V):
                 parameters[0][b] = (parameters[0][b] + (self.ess / V)) / (num_zeros + self.ess)
                 parameters[1][b] = (parameters[1][b] + (self.ess / V)) / (num_ones + self.ess)
+        print("\nDone with fold!")
     
 
     def predict(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -119,13 +121,15 @@ def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: 
         all_ys.extend(y)
     for c in confidences:
         all_confidences.extend(c)
+    
+    print(f"{len(all_confidences)} ROC points")
     auc = util.auc(all_ys, all_confidences)
 
     print("\n***********\n* RESULTS *\n***********")
-    print(f'Accuracy:{np.mean(acc):.3f} {np.var(acc):.3f}')
-    print(f'Precision:{np.mean(precision):.3f} {np.var(precision):.3f}')
-    print(f'Recall:{np.mean(recall):.3f} {np.var(recall):.3f}')
-    print(f'AUR:{auc:.3f}\n')
+    print(f'Accuracy: {np.mean(acc):.3f} {np.var(acc):.3f}')
+    print(f'Precision: {np.mean(precision):.3f} {np.var(precision):.3f}')
+    print(f'Recall: {np.mean(recall):.3f} {np.var(recall):.3f}')
+    print(f'AUR: {auc:.3f}\n')
 
 
 def nbayes(data_path: str, num_bins: int, m: int, use_cross_validation: bool = True):
@@ -150,6 +154,7 @@ def nbayes(data_path: str, num_bins: int, m: int, use_cross_validation: bool = T
         y_hats.append(y_hat)
         confidences.append(confidence)
     
+    print("Evaluating...")
     evaluate_and_print_metrics(ys, y_hats, confidences)
 
 
@@ -158,7 +163,7 @@ if __name__ == "__main__":
     parser.add_argument('path', metavar='PATH', type=str, help='The path to the data.')
     parser.add_argument('numbins', metavar='BINS', type=int,
                         help='The number of bins to create for any continuous attribute.')
-    parser.add_argument('m', metavar='M', type=int,
+    parser.add_argument('m', metavar='M', type=float,
                         help='The estimated equivalent sample size.')
     parser.add_argument('--no-cv', dest='cv', action='store_false',
                         help='Disables cross validation and trains on the full dataset.')

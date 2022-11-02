@@ -424,7 +424,9 @@ def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
 
     y = np.array(y)
     y_hat = np.array(y_hat)
-    return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==0)).sum())
+
+    positives = (y==1)
+    return ((y_hat==1)*positives).sum() / positives.sum()
 
 def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
     """
@@ -444,7 +446,9 @@ def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
 
     y = np.array(y)
     y_hat = np.array(y_hat)
-    return ((y != y_hat)*(y_hat==1)).sum() / ((y==0)).sum()
+
+    negatives = (y == 0)
+    return (negatives*(y_hat==1)).sum() / negatives.sum()
 
 def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
     """
@@ -463,6 +467,7 @@ def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float,
     pairs = []
     y_hat_confidence = np.ones(len(y)) # everything above the confidence threshold is 1. starts all ones
     for i in range(len(y)+1):
+        print(f"Calculating ROC point {i}/{len(p_y_hat)}", end='\r')
         if i != 0:
             y_hat_confidence[i-1] = 0 # moving threshold up by 1
         pairs.append((false_positive_rate(y, y_hat_confidence), recall(y, y_hat_confidence)))
