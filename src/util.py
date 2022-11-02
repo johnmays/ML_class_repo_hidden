@@ -6,6 +6,8 @@ from typing import Tuple, Iterable
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 """
 This is where you will implement helper functions and utility code which you will reuse from project to project.
 Feel free to edit the parameters if necessary or if it makes it more convenient.
@@ -399,6 +401,8 @@ def precision(y: np.ndarray, y_hat: np.ndarray) -> float:
     if n != len(y_hat):
         raise ValueError('y and y_hat must be the same shape/size!')
 
+    y = np.array(y)
+    y_hat = np.array(y_hat)
     return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==1)).sum())
 
 
@@ -418,6 +422,8 @@ def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
     if n != len(y_hat):
         raise ValueError('y and y_hat must be the same shape/size!')
 
+    y = np.array(y)
+    y_hat = np.array(y_hat)
     return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==0)).sum())
 
 def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
@@ -436,7 +442,9 @@ def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
     if n != len(y_hat):
         raise ValueError('y and y_hat must be the same shape/size!')
 
-    return ((y != y_hat)*(y==1)).sum() / (((y == y_hat)*(y==0)).sum() + ((y != y_hat)*(y_hat==1)).sum())
+    y = np.array(y)
+    y_hat = np.array(y_hat)
+    return ((y != y_hat)*(y_hat==1)).sum() / ((y==0)).sum()
 
 def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
     """
@@ -450,14 +458,14 @@ def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float,
         [(TPR_1, FPR_1), (TPR_2, FPR_2), ..., (TPR_N, FPR_N)]
     """
     assert np.shape(y) == np.shape(p_y_hat), 'Arguments must be the same size'
-    sorted_pairs = sorted(zip(p_y_hat, y)) # zip and sort
+    sorted_pairs = sorted(zip(p_y_hat, y), key=lambda x: x[0]) # zip and sort
     p_y_hat, y = zip(*sorted_pairs) # unzip
     pairs = []
     y_hat_confidence = np.ones(len(y)) # everything above the confidence threshold is 1. starts all ones
     for i in range(len(y)+1):
         if i != 0:
             y_hat_confidence[i-1] = 0 # moving threshold up by 1
-        pairs.append((recall(y, y_hat_confidence), false_positive_rate(y, y_hat_confidence)))
+        pairs.append((false_positive_rate(y, y_hat_confidence), recall(y, y_hat_confidence)))
     return pairs
 
 def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
@@ -472,12 +480,17 @@ def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
     """
     roc_pairs = roc_curve_pairs(y, p_y_hat)
     roc_pairs.sort(key = lambda x: x[0])
+    
+    # Debugging code to plot the ROC curve
+    #plt.title("ROC Curve")
+    #plt.plot([p[0] for p in roc_pairs], [p[1] for p in roc_pairs])
+    #plt.show()
 
     area = 0
     last_pair = roc_pairs[0]
     for i in range(1, len(roc_pairs)):
         next_pair = roc_pairs[i]
-        area += ((last_pair[1] + next_pair[1]) / 2) * (next_pair[0] - last_pair[0])
+        area += ((last_pair[1] + next_pair[1]) / 2) * abs(next_pair[0] - last_pair[0])
         last_pair = next_pair
     
     return area
