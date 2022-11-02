@@ -98,7 +98,7 @@ class NaiveBayes(Classifier):
         return y, confidences
 
 
-def evaluate_and_print_metrics(nb: NaiveBayes, X: np.ndarray, y: np.ndarray):
+def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: np.ndarray):
     """
     Print information about the performance of the naive Bayes classifier on testing data.
 
@@ -108,15 +108,23 @@ def evaluate_and_print_metrics(nb: NaiveBayes, X: np.ndarray, y: np.ndarray):
         y: An array of class labels associated with the examples in X.
     """
 
-    y_hat, confidences = nb.predict(X)
-    acc = util.accuracy(y, y_hat)
-    precision = util.precision(y, y_hat)
-    recall = util.recall(y, y_hat)
-    auc = util.auc(y, confidences)
+    acc, precision, recall = [], [], []
+    for i in range(len(ys)):
+        acc.append(util.accuracy(ys[i], y_hats[i]))
+        precision.append(util.precision(ys[i], y_hats[i]))
+        recall.append(util.recall(ys[i], y_hats[i]))
+
+    all_ys, all_confidences = [], []
+    for y in ys:
+        all_ys.extend(y)
+    for c in confidences:
+        all_confidences.extend(c)
+    auc = util.auc(all_ys, all_confidences)
+
     print("\n***********\n* RESULTS *\n***********")
-    print(f'Accuracy:{acc:.3f}')
-    print(f'Precision:{precision:.3f}')
-    print(f'Recall:{recall:.3f}')
+    print(f'Accuracy:{np.mean(acc):.3f} {np.var(acc):.3f}')
+    print(f'Precision:{np.mean(precision):.3f} {np.var(precision):.3f}')
+    print(f'Recall:{np.mean(recall):.3f} {np.var(recall):.3f}')
     print(f'AUR:{auc:.3f}\n')
 
 
@@ -132,10 +140,17 @@ def nbayes(data_path: str, num_bins: int, m: int, use_cross_validation: bool = T
     else:
         datasets = ((X, y, X, y),)
     
+    ys, y_hats, confidences = [], [], []
     for X_train, y_train, X_test, y_test in datasets:
         classifier = NaiveBayes(schema, num_bins, m)
         classifier.fit(X_train, y_train)
-        evaluate_and_print_metrics(classifier, X_test, y_test)
+
+        y_hat, confidence = classifier.predict(X_test)
+        ys.append(y_test)
+        y_hats.append(y_hat)
+        confidences.append(confidence)
+    
+    evaluate_and_print_metrics(ys, y_hats, confidences)
 
 
 if __name__ == "__main__":
