@@ -440,20 +440,36 @@ def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
 
 def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
     """
-    Returns  DO LATER
+    Finds the values of the ROC curve (FPRs and TPRs) by varying the confidence threshold.
+
+    Args: 
+        y: True labels.
+        p_y_hat: Probabilities of the predicted labels.
+
+    Returns an iterable of tuples like this:
+        [(TPR_1, FPR_1), (TPR_2, FPR_2), ..., (TPR_N, FPR_N)]
     """
     assert np.shape(y) == np.shape(p_y_hat), 'Arguments must be the same size'
     sorted_pairs = sorted(zip(p_y_hat, y)) # zip and sort
     p_y_hat, y = zip(*sorted_pairs) # unzip
     pairs = []
-    y_hat_confidence = np.ones(len(y)+1) # everything above the confidence threshold is 1. starts all ones
-    for i in range(len(y)):
+    y_hat_confidence = np.ones(len(y)) # everything above the confidence threshold is 1. starts all ones
+    for i in range(len(y)+1):
         if i != 0:
-            y_hat_confidence[i-1] = 0 
+            y_hat_confidence[i-1] = 0 # moving threshold up by 1
         pairs.append((recall(y, y_hat_confidence), false_positive_rate(y, y_hat_confidence)))
     return pairs
 
 def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
+    """
+    DO LATER
+
+    Args: 
+        y: True labels.
+        p_y_hat: Probabilities of the predicted labels.
+
+    Returns DO LATER
+    """
     roc_pairs = roc_curve_pairs(y, p_y_hat)
     roc_pairs.sort(key = lambda x: x[0])
 
