@@ -116,6 +116,10 @@ def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: 
         precision.append(util.precision(ys[i], y_hats[i]))
         recall.append(util.recall(ys[i], y_hats[i]))
 
+    print("Accuracy: ", acc)
+    print("Precision: ", precision)
+    print("Recall: ", recall)
+
     all_ys, all_confidences = [], []
     for y in ys:
         all_ys.extend(y)
