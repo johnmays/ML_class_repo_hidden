@@ -118,7 +118,6 @@ def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = Tr
         y_hats.append(y_hat)
         confidences.append(confidence)
     
-    print(ys, y_hats)
     print("Evaluating...")
     evaluate_and_print_metrics(ys, y_hats, confidences)
 
