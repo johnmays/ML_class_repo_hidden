@@ -459,7 +459,7 @@ def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float,
         p_y_hat: Probabilities of the predicted labels.
 
     Returns an iterable of tuples like this:
-        [(TPR_1, FPR_1), (TPR_2, FPR_2), ..., (TPR_N, FPR_N)]
+        [(FPR_1, TPR_1), (FPR_2, TPR_2), ..., (FPR_N, TPR_N)]
     """
     assert np.shape(y) == np.shape(p_y_hat), 'Arguments must be the same size'
     sorted_pairs = sorted(zip(p_y_hat, y), key=lambda x: x[0]) # zip and sort
@@ -473,6 +473,35 @@ def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float,
         pairs.append((false_positive_rate(y, y_hat_confidence), recall(y, y_hat_confidence)))
     return pairs
 
+def roc_curve_pairs_On(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
+    """
+    Finds the values of the ROC curve as in roc_curve_pairs, but in O(n) time.
+
+    Args:
+        y: the true labels for a set of examples X.
+        p_y_hat: the confidences P(y = 1|X) produced by the model, given X.
+    
+    Returns: an iterable of tuples representing ROC points.
+    """
+    assert np.shape(y) == np.shape(p_y_hat), 'Arguments must be the same size'
+    sorted_pairs = sorted(zip(p_y_hat, y), key=lambda x: x[0], reverse=True) # zip and sort
+    p_y_hat, y = zip(*sorted_pairs) # unzip
+    
+    pairs = [(0, 0)]
+    num_positives = sum(y)
+    num_negatives = len(y) - num_positives
+    tps, fps = 0, 0
+    for label in y:
+        if label == 1:
+            # You've added a true positive
+            tps += 1
+        else:
+            # You've added a false positive
+            fps += 1
+        pairs.append((fps/num_negatives, tps/num_positives))
+
+    return pairs
+
 def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
     """
     DO LATER
@@ -483,7 +512,7 @@ def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
 
     Returns DO LATER
     """
-    roc_pairs = roc_curve_pairs(y, p_y_hat)
+    roc_pairs = roc_curve_pairs_On(y, p_y_hat)
     roc_pairs.sort(key = lambda x: x[0])
     
     # Debugging code to plot the ROC curve
