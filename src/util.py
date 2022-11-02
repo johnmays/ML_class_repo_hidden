@@ -455,4 +455,13 @@ def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float,
 
 def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
     roc_pairs = roc_curve_pairs(y, p_y_hat)
-    raise NotImplementedError()
+    roc_pairs.sort(key = lambda x: x[0])
+
+    area = 0
+    last_pair = roc_pairs[0]
+    for i in range(1, len(roc_pairs)):
+        next_pair = roc_pairs[i]
+        area += ((last_pair[1] + next_pair[1]) / 2) * (next_pair[0] - last_pair[0])
+        last_pair = next_pair
+    
+    return area

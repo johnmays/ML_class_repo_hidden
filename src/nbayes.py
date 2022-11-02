@@ -1,7 +1,7 @@
 import argparse
 import os.path
 import numpy as np
-from typing import List
+from typing import List, Tuple
 
 import util
 
@@ -60,7 +60,7 @@ class NaiveBayes(Classifier):
                 parameters[1][b] = (parameters[1][b] + (self.ess / V)) / (num_ones + self.ess)
     
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
+    def predict(self, X: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """
         This method uses the Naive Bayes classifier to label a set of examples, X.
 
@@ -70,9 +70,10 @@ class NaiveBayes(Classifier):
         Returns: Predictions of shape (n_examples,), either 0 or 1
         """
         y = []
+        confidences = []
         for example in X:
             # 'likelihood' tracks the probability of X, given 0 and 1 respectively
-            likelihood = [1, 1]
+            likelihood = [1 - self.prior, self.prior]
             for index in range(len(self.schema)):
                 feature = self.schema[index]
                 parameters = self.model[index]
@@ -87,8 +88,14 @@ class NaiveBayes(Classifier):
                     likelihood[1] *= parameters[1][bin]
 
             y.append((likelihood[1] >= likelihood[0]) * 1)
+            # confidence = P(Y = y | X)
+            # We've already calculated P(Y = y, X) for all two values of Y.
+            # Therefore, we can find P(X) through marginalization (sum(likelihood)),
+            # and can easily find the confidence through Bayes' rule.
+            p_y_given_x = likelihood[y[-1]] / sum(likelihood)
+            confidences.append(p_y_given_x if y[-1] else 1 - p_y_given_x)
 
-        return y
+        return y, confidences
 
 
 def evaluate_and_print_metrics(nb: NaiveBayes, X: np.ndarray, y: np.ndarray):
@@ -101,16 +108,16 @@ def evaluate_and_print_metrics(nb: NaiveBayes, X: np.ndarray, y: np.ndarray):
         y: An array of class labels associated with the examples in X.
     """
 
-    y_hat = nb.predict(X)
+    y_hat, confidences = nb.predict(X)
     acc = util.accuracy(y, y_hat)
-    #precision = util.precision(y, y_hat)
-    #recall = util.recall(y, y_hat)
-    #auc = util.auc(y, y_hat)
+    precision = util.precision(y, y_hat)
+    recall = util.recall(y, y_hat)
+    auc = util.auc(y, confidences)
     print("\n***********\n* RESULTS *\n***********")
-    print(f'Accuracy:{acc:.2f}')
-    #print('Precision:', dtree.size)
-    #print('Recall:', dtree.depth)
-    #print('AUR:', dtree.schema[dtree.root.attribute_index].name, '\n')
+    print(f'Accuracy:{acc:.3f}')
+    print(f'Precision:{precision:.3f}')
+    print(f'Recall:{recall:.3f}')
+    print(f'AUR:{auc:.3f}\n')
 
 
 def nbayes(data_path: str, num_bins: int, m: int, use_cross_validation: bool = True):
