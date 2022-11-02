@@ -420,9 +420,38 @@ def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
 
     return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==0)).sum())
 
-def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
-    raise NotImplementedError()
+def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
+    """
+    Returns the FPR between a true results array and a predicted array.
 
+    Args:
+        y: True labels.
+        y_hat: Predicted labels.
+
+    Returns: FPR = FP/(FP+TN)
+    """
+
+    n = len(y)
+    
+    if n != len(y_hat):
+        raise ValueError('y and y_hat must be the same shape/size!')
+
+    return ((y != y_hat)*(y==1)).sum() / (((y == y_hat)*(y==0)).sum() + ((y != y_hat)*(y_hat==1)).sum())
+
+def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
+    """
+    Returns  DO LATER
+    """
+    assert np.shape(y) == np.shape(p_y_hat), 'Arguments must be the same size'
+    sorted_pairs = sorted(zip(p_y_hat, y)) # zip and sort
+    p_y_hat, y = zip(*sorted_pairs) # unzip
+    pairs = []
+    y_hat_confidence = np.ones(len(y)+1) # everything above the confidence threshold is 1. starts all ones
+    for i in range(len(y)):
+        if i != 0:
+            y_hat_confidence[i-1] = 0 
+        pairs.append((recall(y, y_hat_confidence), false_positive_rate(y, y_hat_confidence)))
+    return pairs
 
 def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
     roc_pairs = roc_curve_pairs(y, p_y_hat)
