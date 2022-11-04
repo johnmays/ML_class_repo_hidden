@@ -151,7 +151,7 @@ def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = Tr
     ys, y_hats, confidences = [], [], []
     for X_train, y_train, X_test, y_test in datasets:
         classifier = LogReg(lamb, rate)
-        classifier.fit(X_train, y_train, 200)
+        classifier.fit(X_train, y_train, 2500)
 
         y_hat, confidence = classifier.predict(X_test)
         ys.append(y_test)
