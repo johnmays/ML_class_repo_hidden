@@ -31,7 +31,9 @@ class LogReg(Classifier):
     
     def fit(self, X: np.ndarray, y: np.ndarray, epoch: int, plot=False) -> None:
         self.W = np.random.randn(len(X[0]),)+1
+        print(np.shape(self.W))
         self.B = np.random.randn()
+        print(type(self.W))
         acc = []
         if plot:
             for i in range(0, epoch):

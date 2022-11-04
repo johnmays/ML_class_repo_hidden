@@ -329,15 +329,18 @@ def cv_split(
 
 def getData(X: np.ndarray, y:np.ndarray, num: int):
     """
-    Select random element from given array, remove element when extract
+    Select random example/label pairs from X and y without replacement.  Return the new X,y + arrays of the removed examples/labels.
 
     Args: 
-        array: array of raw data
-        num: number of element need to be extract from array
+        X: An array of examples.
+        y: An array of class labels.
+        num: the number of example & label pairs to remove.
 
     Returns:
-        result: array of extracted data
-        array: the origional array after extract data
+        result_X: The removed examples.
+        result_y: The removed labels.
+        X: The original X without the removed examples.
+        y: The original y without the removed labels.
     """
     if num == 0:
         return X, y, [], []
@@ -348,7 +351,7 @@ def getData(X: np.ndarray, y:np.ndarray, num: int):
     # Create framework of result
     index = random.randint(0, len(X)-1)
 
-    result_x = np.array([X[index].copy()])
+    result_X = np.array([X[index].copy()])
     result_y = np.array([y[index].copy()])
     X = np.delete(X, index, axis=0)
     y = np.delete(y, index)
@@ -356,13 +359,13 @@ def getData(X: np.ndarray, y:np.ndarray, num: int):
     # Extract element from origional array
     for i in range(0, num-1):
         index = random.randint(0, len(X)-1)
-        result_y = np.append(result_y, y[index].copy())
+        result_X = np.append(result_y, y[index].copy())
         y = np.delete(y, index)
         
-        result_x = np.append(result_x, [X[index].copy()], axis=0)
+        result_X = np.append(result_X, [X[index].copy()], axis=0)
         X = np.delete(X, index, axis=0)
 
-    return result_x, result_y, X, y
+    return result_X, result_y, X, y
 
 
 
@@ -428,6 +431,8 @@ def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
     y_hat = np.array(y_hat)
 
     positives = (y==1)
+    if positives.sum() == 0:
+        return 0
     return ((y_hat==1)*positives).sum() / positives.sum()
 
 def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
@@ -450,30 +455,9 @@ def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
     y_hat = np.array(y_hat)
 
     negatives = (y == 0)
+    if negatives.sum() == 0:
+        return 0
     return (negatives*(y_hat==1)).sum() / negatives.sum()
-
-def roc_curve_pairs(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
-    """
-    Finds the values of the ROC curve (FPRs and TPRs) by varying the confidence threshold.
-
-    Args: 
-        y: True labels.
-        p_y_hat: Probabilities of the predicted labels.
-
-    Returns an iterable of tuples like this:
-        [(FPR_1, TPR_1), (FPR_2, TPR_2), ..., (FPR_N, TPR_N)]
-    """
-    assert np.shape(y) == np.shape(p_y_hat), 'Arguments must be the same size'
-    sorted_pairs = sorted(zip(p_y_hat, y), key=lambda x: x[0]) # zip and sort
-    p_y_hat, y = zip(*sorted_pairs) # unzip
-    pairs = []
-    y_hat_confidence = np.ones(len(y)) # everything above the confidence threshold is 1. starts all ones
-    for i in range(len(y)+1):
-        print(f"Calculating ROC point {i}/{len(p_y_hat)}", end='\r')
-        if i != 0:
-            y_hat_confidence[i-1] = 0 # moving threshold up by 1
-        pairs.append((false_positive_rate(y, y_hat_confidence), recall(y, y_hat_confidence)))
-    return pairs
 
 def roc_curve_pairs_On(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
     """
@@ -506,13 +490,13 @@ def roc_curve_pairs_On(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[flo
 
 def auc(y: np.ndarray, p_y_hat: np.ndarray) -> float:
     """
-    DO LATER
+    Finds the area under the ROC curve essentially via a sum of Reimann rectangles.
 
     Args: 
         y: True labels.
         p_y_hat: Probabilities of the predicted labels.
 
-    Returns DO LATER
+    Returns the area under the ROC curve as a float.
     """
     roc_pairs = roc_curve_pairs_On(y, p_y_hat)
     roc_pairs.sort(key = lambda x: x[0])
