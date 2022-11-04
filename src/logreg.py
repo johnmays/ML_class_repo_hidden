@@ -34,20 +34,30 @@ class LogReg(Classifier):
         print(np.shape(self.W))
         self.B = np.random.randn()
         print(type(self.W))
-        acc = []
-        for i in range(0, epoch):
-            #X_temp = X[example].copy()
-            gradient_w = self.gradient_w_r(X, y)
-            gradient_b = self.gradient_b_r(X, y)
-            #print(f"old W:{log.W}, old B:{log.B}")
-            #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
-            self.W = self.W - (self.rate*gradient_w)
-            self.B = self.B - (self.rate*gradient_b)
-            #print(f"new W:{log.W}, new B:{log.B}")
-            acc.append(util.accuracy(y, self.predict(X)[0]))
         if plot:
+            acc = []
+            for i in range(0, epoch):
+                #X_temp = X[example].copy()
+                gradient_w = self.gradient_w_r(X, y)
+                gradient_b = self.gradient_b_r(X, y)
+                #print(f"old W:{log.W}, old B:{log.B}")
+                #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
+                self.W = self.W - (self.rate*gradient_w)
+                self.B = self.B - (self.rate*gradient_b)
+                #print(f"new W:{log.W}, new B:{log.B}")
+                acc.append(util.accuracy(y, self.predict(X)[0]))
             plt.plot(acc)
             plt.show()
+        else:
+             for i in range(0, epoch):
+                #X_temp = X[example].copy()
+                gradient_w = self.gradient_w_r(X, y)
+                gradient_b = self.gradient_b_r(X, y)
+                #print(f"old W:{log.W}, old B:{log.B}")
+                #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
+                self.W = self.W - (self.rate*gradient_w)
+                self.B = self.B - (self.rate*gradient_b)
+                #print(f"new W:{log.W}, new B:{log.B}")
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         W = self.W
@@ -80,12 +90,12 @@ class LogReg(Classifier):
         W = self.W
         B = self.B
         lamb = self.lamb
-        return np.dot(X.T, (self.sigmoid(X)-y)) + lamb * W
+        return np.dot(X.T, (self.sigmoid(X)-y))/len(y) + lamb * W
     
     def gradient_b_r(self, X, y):
         W = self.W
         B = self.B
-        return np.sum(self.sigmoid(X)-y)
+        return np.sum(self.sigmoid(X)-y)/len(y)
     
     def cost(self, X, y):
         W = self.W
