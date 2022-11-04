@@ -431,6 +431,8 @@ def recall(y: np.ndarray, y_hat: np.ndarray) -> float:
     y_hat = np.array(y_hat)
 
     positives = (y==1)
+    if positives.sum() == 0:
+        return 0
     return ((y_hat==1)*positives).sum() / positives.sum()
 
 def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
@@ -453,6 +455,8 @@ def false_positive_rate(y: np.ndarray, y_hat: np.ndarray) -> float:
     y_hat = np.array(y_hat)
 
     negatives = (y == 0)
+    if negatives.sum() == 0:
+        return 0
     return (negatives*(y_hat==1)).sum() / negatives.sum()
 
 def roc_curve_pairs_On(y: np.ndarray, p_y_hat: np.ndarray) -> Iterable[Tuple[float, float]]:
