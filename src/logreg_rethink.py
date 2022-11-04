@@ -4,6 +4,7 @@ import math
 import util
 import os
 from numpy import linalg as LA
+import matplotlib.pyplot as plt
 
 from sting.classifier import Classifier
 from sting.data import Feature, FeatureType, parse_c45
@@ -14,8 +15,7 @@ class LogReg(Classifier):
         self.lamb = lamb
         self.rate = rate
         
-
-    def fit(self, X: np.ndarray, y: np.ndarray, epoch: int) -> None:
+    def fit_s(self, X: np.ndarray, y: np.ndarray, epoch: int) -> None:
         self.W = np.random.randn(len(X[0]),)+1
         self.B = np.random.randn()
         for i in range(0, epoch):
@@ -28,6 +28,24 @@ class LogReg(Classifier):
                 self.W = self.W - (self.rate*gradient_w)
                 self.B = self.B - (self.rate*gradient_b)
                 #print(f"new W:{log.W}, new B:{log.B}")
+    
+    def fit(self, X: np.ndarray, y: np.ndarray, epoch: int, plot=False) -> None:
+        self.W = np.random.randn(len(X[0]),)+1
+        self.B = np.random.randn()
+        acc = []
+        for i in range(0, epoch):
+            #X_temp = X[example].copy()
+            gradient_w = self.gradient_w_r(X, y)
+            gradient_b = self.gradient_b_r(X, y)
+            #print(f"old W:{log.W}, old B:{log.B}")
+            #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
+            self.W = self.W - (self.rate*gradient_w)
+            self.B = self.B - (self.rate*gradient_b)
+            #print(f"new W:{log.W}, new B:{log.B}")
+            acc.append(util.accuracy(y, self.predict(X)[0]))
+        if plot:
+            plt.plot(acc)
+            plt.show()
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         W = self.W
@@ -45,7 +63,7 @@ class LogReg(Classifier):
         W = self.W
         B = self.B
         #The logistic regression equation
-        return 1/(1+np.exp(-(np.sum(W*X)+B)))
+        return 1/(1+np.exp(-(np.sum(W*X, axis=1)+B)))
     
     def gradient_w(self, X, y):
         W = self.W
@@ -54,9 +72,18 @@ class LogReg(Classifier):
         return X * (self.sigmoid(X)-y) + lamb * W
     
     def gradient_b(self, X, y):
+        return np.sum(self.sigmoid(X)-y)
+
+    def gradient_w_r(self, X, y):
         W = self.W
         B = self.B
-        return (self.sigmoid(X)-y)
+        lamb = self.lamb
+        return np.dot(X.T, (self.sigmoid(X)-y)) + lamb * W
+    
+    def gradient_b_r(self, X, y):
+        W = self.W
+        B = self.B
+        return np.sum(self.sigmoid(X)-y)
     
     def cost(self, X, y):
         W = self.W
@@ -80,6 +107,7 @@ def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: 
         acc.append(util.accuracy(ys[i], y_hats[i]))
         precision.append(util.precision(ys[i], y_hats[i]))
         recall.append(util.recall(ys[i], y_hats[i]))
+    print(precision)
 
     all_ys, all_confidences = [], []
     for y in ys:
@@ -111,13 +139,13 @@ def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = Tr
     ys, y_hats, confidences = [], [], []
     for X_train, y_train, X_test, y_test in datasets:
         classifier = LogReg(lamb, rate)
-        classifier.fit(X_train, y_train, 100)
+        classifier.fit(X_train, y_train, 200)
 
         y_hat, confidence = classifier.predict(X_test)
         ys.append(y_test)
         y_hats.append(y_hat)
         confidences.append(confidence)
-    
+    #print(ys, y_hats)
     print("Evaluating...")
     evaluate_and_print_metrics(ys, y_hats, confidences)
 

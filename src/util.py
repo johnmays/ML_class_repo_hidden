@@ -403,6 +403,8 @@ def precision(y: np.ndarray, y_hat: np.ndarray) -> float:
 
     y = np.array(y)
     y_hat = np.array(y_hat)
+    if ((y == y_hat)*(y==1)).sum() == 0:
+        return 0
     return ((y == y_hat)*(y==1)).sum() / (((y == y_hat)*(y==1)).sum() + ((y != y_hat)*(y_hat==1)).sum())
 
 
