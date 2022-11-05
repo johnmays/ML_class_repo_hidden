@@ -352,6 +352,7 @@ def getData(X: np.ndarray, y:np.ndarray, num: int):
     index = random.randint(0, len(X)-1)
 
     result_X = np.array([X[index].copy()])
+    print(result_X, result_X.shape)
     result_y = np.array([y[index].copy()])
     X = np.delete(X, index, axis=0)
     y = np.delete(y, index)
@@ -362,7 +363,8 @@ def getData(X: np.ndarray, y:np.ndarray, num: int):
         result_X = np.append(result_y, y[index].copy())
         y = np.delete(y, index)
         
-        result_X = np.append(result_X, [X[index].copy()], axis=0)
+        print(np.array([X[index].copy()]).shape)
+        result_X = np.append(result_X, np.array([X[index].copy()]), axis=0)
         X = np.delete(X, index, axis=0)
 
     return result_X, result_y, X, y

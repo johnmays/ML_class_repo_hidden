@@ -10,6 +10,14 @@ from sting.data import Feature, FeatureType, parse_c45
 
 class NaiveBayes(Classifier):
     def __init__(self, schema: List[Feature], num_bins: int, m: int) -> None:
+        """
+        These are the information which will make the classifier
+
+        Args:
+            schema: the schema file that loaded using sting
+            num_bins: number of bins which used to label continuous variable
+            m: smoothing parameter
+        """
         self.schema = schema
         self.num_bins = num_bins
         self.ess = m
@@ -27,6 +35,13 @@ class NaiveBayes(Classifier):
 
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> None:
+        """
+        This is the method where the training algorithm will run.
+
+        Args:
+            X: The dataset. The shape is (n_examples, n_features).
+            y: The labels. The shape is (n_examples,)
+        """
         num_ones = sum(y)
         num_zeros = len(y) - num_ones
         self.prior = num_ones / len(y)
@@ -137,6 +152,15 @@ def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: 
 
 
 def nbayes(data_path: str, num_bins: int, m: int, use_cross_validation: bool = True):
+    """
+    The main fuction which perform calculation of naive bayse
+
+    Args:
+        data_path: the path to data file
+        num_bins: number of bins which used to label continuous variable
+        m: smoothing parameter
+        use_cross_validation: use corss validation or not
+    """
     # last entry in the data_path is the file base (name of the dataset)
     path = os.path.expanduser(data_path).split(os.sep)
     file_base = path[-1]  # -1 accesses the last entry of an iterable in Python
