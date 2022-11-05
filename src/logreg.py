@@ -15,9 +15,12 @@ class LogReg(Classifier):
         self.lamb = lamb
         self.rate = rate
         
-    def fit_s(self, X: np.ndarray, y: np.ndarray, epoch: int) -> None:
+    def fit_s(self, X: np.ndarray, y: np.ndarray, epoch: int, research: bool = False, seed: int = 12345) -> None:
+        if research == True:
+            np.random.seed(seed) # to ensure the weights
         self.W = np.random.randn(len(X[0]),)+1
         self.B = np.random.randn()
+        losses = np.zeros(epoch)
         for i in range(0, epoch):
             for example in range(0, len(y)):
                 #X_temp = X[example].copy()
@@ -28,36 +31,38 @@ class LogReg(Classifier):
                 self.W = self.W - (self.rate*gradient_w)
                 self.B = self.B - (self.rate*gradient_b)
                 #print(f"new W:{log.W}, new B:{log.B}")
+            if research:
+                losses[i] = self.cost(X,y)
+        if research:
+            return losses
+        else:
+            return None
+        
     
-    def fit(self, X: np.ndarray, y: np.ndarray, epoch: int, plot=False) -> None:
+    def fit(self, X: np.ndarray, y: np.ndarray, epoch: int, research: bool = False, seed: int = 12345) -> None:
+        if research == True:
+            np.random.seed(seed) # to ensure the weights
         self.W = np.random.randn(len(X[0]),)+1
         print(np.shape(self.W))
         self.B = np.random.randn()
         print(type(self.W))
-        if plot:
-            acc = []
-            for i in range(0, epoch):
-                #X_temp = X[example].copy()
-                gradient_w = self.gradient_w_r(X, y)
-                gradient_b = self.gradient_b_r(X, y)
-                #print(f"old W:{log.W}, old B:{log.B}")
-                #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
-                self.W = self.W - (self.rate*gradient_w)
-                self.B = self.B - (self.rate*gradient_b)
-                #print(f"new W:{log.W}, new B:{log.B}")
-                acc.append(util.accuracy(y, self.predict(X)[0]))
-            plt.plot(acc)
-            plt.show()
+        losses = np.zeros(epoch)
+        for i in range(0, epoch):
+            #X_temp = X[example].copy()
+            gradient_w = self.gradient_w_r(X, y)
+            gradient_b = self.gradient_b_r(X, y)
+            #print(f"old W:{log.W}, old B:{log.B}")
+            #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
+            self.W = self.W - (self.rate*gradient_w)
+            self.B = self.B - (self.rate*gradient_b)
+            #print(f"new W:{log.W}, new B:{log.B}")
+            if research:
+                losses[i] = self.cost(X,y)
+        if research:
+            return losses
         else:
-             for i in range(0, epoch):
-                #X_temp = X[example].copy()
-                gradient_w = self.gradient_w_r(X, y)
-                gradient_b = self.gradient_b_r(X, y)
-                #print(f"old W:{log.W}, old B:{log.B}")
-                #print(f"gradient W:{gradient_w}, gradient B:{gradient_b}")
-                self.W = self.W - (self.rate*gradient_w)
-                self.B = self.B - (self.rate*gradient_b)
-                #print(f"new W:{log.W}, new B:{log.B}")
+            return None
+        
 
     def predict(self, X: np.ndarray) -> np.ndarray:
         W = self.W
@@ -136,7 +141,7 @@ def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: 
     print(f'Recall: {np.mean(recall):.3f} {np.var(recall):.3f}')
     print(f'AUR: {auc:.3f}\n')
 
-def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = True):
+def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = True, research: bool = False):
     # last entry in the data_path is the file base (name of the dataset)
     path = os.path.expanduser(data_path).split(os.sep)
     file_base = path[-1]  # -1 accesses the last entry of an iterable in Python
@@ -148,18 +153,47 @@ def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = Tr
     else:
         datasets = ((X, y, X, y),)
     
-    ys, y_hats, confidences = [], [], []
-    for X_train, y_train, X_test, y_test in datasets:
-        classifier = LogReg(lamb, rate)
-        classifier.fit(X_train, y_train, 2500)
+    print("Fitting...")
+    if not research:
+        ys, y_hats, confidences = [], [], []
+        for X_train, y_train, X_test, y_test in datasets:
+            classifier = LogReg(lamb, rate)
+            classifier.fit(X_train, y_train, 2500)
 
-        y_hat, confidence = classifier.predict(X_test)
-        ys.append(y_test)
-        y_hats.append(y_hat)
-        confidences.append(confidence)
-    #print(ys, y_hats)
-    print("Evaluating...")
-    evaluate_and_print_metrics(ys, y_hats, confidences)
+            y_hat, confidence = classifier.predict(X_test)
+            ys.append(y_test)
+            y_hats.append(y_hat)
+            confidences.append(confidence)
+            print("Evaluating...")
+            evaluate_and_print_metrics(ys, y_hats, confidences)
+    else: # Research Extension Fitting/Plotting:
+        X_train, y_train, X_test, y_test = datasets[0]
+        print(np.shape(X_train))
+        print(np.shape(y_train))
+        # Fitting two ways (stochastic GD, normal GD)
+        seed = np.random.randint(10000,99999) # rand seed so the weights can still be random, but will be the same for all fit methods
+        classifier_s = LogReg(lamb, rate)
+        classifier_n = LogReg(lamb, rate)
+        losses_stochastic = classifier_s.fit_s(X_train, y_train, 2500, research=True, seed=seed)
+        losses_normal = classifier_n.fit(X_train, y_train, 2500, research=True, seed=seed)
+
+        # Plotting the losses
+        plt.plot(losses_stochastic, color="#b59fd0")
+        plt.plot(losses_normal, color="#482980")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.title("Loss over time for SGD and GD")
+        plt.show()
+
+        # Evaluating for Stochastic GD
+        y_hat, confidence = classifier_s.predict(X_test)
+        print("Evaluating Stochastic...")
+        evaluate_and_print_metrics((y_test,), (y_hat,), (confidences,))
+
+        # Evaluating for Normal GD
+        y_hat, confidence = classifier_n.predict(X_test)
+        print("Evaluating Normal...")
+        evaluate_and_print_metrics((y_test,), (y_hat,), (confidences,))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run a Logistic regression algorithm.')
@@ -168,6 +202,8 @@ if __name__ == "__main__":
     parser.add_argument('rate', metavar='RATE', type=float, help='Learning rate.')
     parser.add_argument('--no-cv', dest='cv', action='store_false',
                         help='Disables cross validation and trains on the full dataset.')
+    parser.add_argument('--research', dest='research', action='store_true',
+                        help='Enables the fit() and tree algo for the research question instead of running the normal fit/tree algo.')
     parser.set_defaults(cv=True, gain_ratio=False)
     args = parser.parse_args()
 
@@ -175,5 +211,8 @@ if __name__ == "__main__":
     lamb = args.lamb
     rate = args.rate
     use_cross_validation = args.cv
+    research = args.research
 
-    logreg(data_path, lamb, rate, use_cross_validation)
+    if research and use_cross_validation:
+        raise argparse.ArgumentError('The research cannot use CV.  Call research with the --no-cv flag')
+    logreg(data_path, lamb, rate, use_cross_validation, research)
