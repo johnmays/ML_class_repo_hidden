@@ -17,10 +17,10 @@ class LogReg(Classifier):
         
     def fit_s(self, X: np.ndarray, y: np.ndarray, epoch: int, research: bool = False, seed: int = 12345) -> None:
         if research == True:
-            np.random.seed(seed) # to ensure the weights
+            np.random.seed(seed) # to ensure the weights are the same for stochastic and normal
         self.W = np.random.randn(len(X[0]),)+1
         self.B = np.random.randn()
-        losses = np.zeros(epoch)
+        acc = []
         for i in range(0, epoch):
             for example in range(0, len(y)):
                 #X_temp = X[example].copy()
@@ -32,21 +32,19 @@ class LogReg(Classifier):
                 self.B = self.B - (self.rate*gradient_b)
                 #print(f"new W:{log.W}, new B:{log.B}")
             if research:
-                losses[i] = self.cost(X,y)
+                acc.append(util.accuracy(y, self.predict(X)[0]))
         if research:
-            return losses
+            return acc
         else:
             return None
         
     
     def fit(self, X: np.ndarray, y: np.ndarray, epoch: int, research: bool = False, seed: int = 12345) -> None:
         if research == True:
-            np.random.seed(seed) # to ensure the weights
+            np.random.seed(seed) # to ensure the weights are the same for stochastic and normal
         self.W = np.random.randn(len(X[0]),)+1
-        print(np.shape(self.W))
         self.B = np.random.randn()
-        print(type(self.W))
-        losses = np.zeros(epoch)
+        acc = []
         for i in range(0, epoch):
             #X_temp = X[example].copy()
             gradient_w = self.gradient_w_r(X, y)
@@ -57,9 +55,9 @@ class LogReg(Classifier):
             self.B = self.B - (self.rate*gradient_b)
             #print(f"new W:{log.W}, new B:{log.B}")
             if research:
-                losses[i] = self.cost(X,y)
+                acc.append(util.accuracy(y, self.predict(X)[0]))
         if research:
-            return losses
+            return acc
         else:
             return None
         
@@ -76,6 +74,12 @@ class LogReg(Classifier):
         confidences = np.sum(W * X, axis=1)+B
         return prediction, confidences
     
+    def sigmoid_s(self, X):
+        W = self.W
+        B = self.B
+        #The logistic regression equation
+        return 1/(1+np.exp(-(np.sum(W*X, axis=0)+B)))
+
     def sigmoid(self, X):
         W = self.W
         B = self.B
@@ -86,10 +90,10 @@ class LogReg(Classifier):
         W = self.W
         B = self.B
         lamb = self.lamb
-        return X * (self.sigmoid(X)-y) + lamb * W
+        return X * (self.sigmoid_s(X)-y) + lamb * W
     
     def gradient_b(self, X, y):
-        return np.sum(self.sigmoid(X)-y)
+        return np.sum(self.sigmoid_s(X)-y)
 
     def gradient_w_r(self, X, y):
         W = self.W
@@ -101,13 +105,6 @@ class LogReg(Classifier):
         W = self.W
         B = self.B
         return np.sum(self.sigmoid(X)-y)/len(y)
-    
-    def cost(self, X, y):
-        W = self.W
-        B = self.B
-        lamb = self.lamb
-        return np.sum(-y * np.log(1/(1+np.exp(-(np.sum(X*W, axis=1)+B)))) - (1-y) *np.log(1-(1/(1+np.exp(-(np.sum(X*W, axis=1)+B))))) + lamb/2*LA.norm(W)**2)
-
 
 def evaluate_and_print_metrics(ys: np.ndarray, y_hats: np.ndarray, confidences: np.ndarray):
     """
@@ -174,26 +171,27 @@ def logreg(data_path: str, lamb: int, rate: int, use_cross_validation: bool = Tr
         seed = np.random.randint(10000,99999) # rand seed so the weights can still be random, but will be the same for all fit methods
         classifier_s = LogReg(lamb, rate)
         classifier_n = LogReg(lamb, rate)
-        losses_stochastic = classifier_s.fit_s(X_train, y_train, 2500, research=True, seed=seed)
-        losses_normal = classifier_n.fit(X_train, y_train, 2500, research=True, seed=seed)
+        losses_stochastic = classifier_s.fit_s(X_train, y_train, 12000, research=True, seed=seed)
+        losses_normal = classifier_n.fit(X_train, y_train, 12000, research=True, seed=seed)
 
         # Plotting the losses
-        plt.plot(losses_stochastic, color="#b59fd0")
-        plt.plot(losses_normal, color="#482980")
+        plt.plot(losses_stochastic, color="#b59fd0", label = 'Stochastic GD')
+        plt.plot(losses_normal, color="#482980", label='Normal GD')
         plt.xlabel("Epoch")
-        plt.ylabel("Loss")
-        plt.title("Loss over time for SGD and GD")
+        plt.ylabel("Accuracy")
+        plt.title("Accuracy over time for SGD and GD")
+        plt.legend()
         plt.show()
 
         # Evaluating for Stochastic GD
-        y_hat, confidence = classifier_s.predict(X_test)
-        print("Evaluating Stochastic...")
-        evaluate_and_print_metrics((y_test,), (y_hat,), (confidences,))
+        # y_hat, confidence = classifier_s.predict(X_test)
+        # print("Evaluating Stochastic...")
+        # evaluate_and_print_metrics((y_test,), (y_hat,), (confidences,))
 
         # Evaluating for Normal GD
-        y_hat, confidence = classifier_n.predict(X_test)
-        print("Evaluating Normal...")
-        evaluate_and_print_metrics((y_test,), (y_hat,), (confidences,))
+        # y_hat, confidence = classifier_n.predict(X_test)
+        # print("Evaluating Normal...")
+        # evaluate_and_print_metrics((y_test,), (y_hat,), (confidences,))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run a Logistic regression algorithm.')
