@@ -26,9 +26,9 @@ Answer: Looking at the laws of matrix manipulation, this problem actually become
 - Since $b \leq (Ax)$, $b^Tu \leq u^T(Ax)$.
     - $u^T(Ax) = (u^TA)x$ by the associative property of matrix multiplication
     - $= (A^Tu)^Tx$ by a transpose rule of matrices
-    - $\leq (c^T)x$ by the constraint of the dual problem
-- So, $b^Tu \leq u^T(Ax) \leq (c^T)x$
-- By the transitive property, $b^Tu \leq (c^T)x$
+    - $\leq (c)^Tx$ by the constraint of the dual problem
+- So, $b^Tu \leq u^T(Ax) \leq (c)^Tx$
+- By the transitive property, $b^Tu \leq (c)^Tx$
 
 
 22.	Derive the backpropagation weight updates for hidden-to-output and input-to-hidden weights when the loss function is cross entropy with a weight decay term. Cross entropy is defined as $L(\mathbf{w})=\sum_i y_i\log{(\hat{y}_i)}+(1-y_i)\log{(1-\hat{y}_i)}$ , where $i$ ranges over examples, $y_i$ is true label (assumed 0/1) and $\hat{y}_i$  is the estimated label for the $i^{th}$ example. (10 points)
@@ -51,7 +51,7 @@ $\frac{dL}{dw^L_{ji}} = (\frac{y_i}{x^L_i} + \frac{y_i-1}{1-x^L_i}) (h(n^L_j)(1-
 
 Since the input-to-hidden weight gradients are dependent only on the gradients of later weights (rather than the explicit loss function), we can express them in essentially the same way as in class for squared loss. We still derive them using the chain rule, except for that $\frac{dL}{dx^l_j}$ is calculated as a sum across the gradients of all downstream nodes:
 
-$\frac{dL}{dw^l_{ji}} = (\sum_{k} \frac{dL}{dw_{kj}^{l+1}} \frac{w_{kj}^{l+1}}{x_j^l}) (h(n^l_j)(1-h(n^l_j))) (x_i^{l-1}) + w^L_{ji}$
+$\frac{dL}{dw^l_{ji}} = (\sum_{k} \frac{dL}{dw_{kj}^{l+1}} \frac{w_{kj}^{l+1}}{x_j^l}) (h(n^l_j)(1-h(n^l_j))) (x_i^{l-1}) + w^l_{ji}$
 
 
 23.	Consider a neural network with a single hidden layer with sigmoid activation functions and a single output unit also with a sigmoid activation, and fixed weights. Show that there exists an equivalent network, which computes exactly the same function, where the hidden unit activations are the $\tanh$ function described in class, and the output unit still has a sigmoid activation. (10 points)
