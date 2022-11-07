@@ -38,7 +38,7 @@ We also know that $\lambda$ is between $0$ and $1$, which means that $(1-\lambda
 
 Therefore, we have the equation
 
-$(\text{positive coefficient})(\text{nonnegative-entry vector})+(\text{positive coefficient})(\text{nonnegative-entry vector}) < 0$
+$(\text{nonnegative coefficient})(\text{nonnegative-entry vector})+(\text{nonnegative coefficient})(\text{nonnegative-entry vector}) < 0$
 
 which is an impossible contradiction.
 
