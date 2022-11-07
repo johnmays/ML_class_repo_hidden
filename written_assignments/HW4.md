@@ -8,7 +8,45 @@ James McHargue, John Mays, Zaichuan You
 
 Answer: 
 
-_claimed by John_
+To begin, I will define a convex set: A set $\mathbf{C}$ is convex if, for any two members, $x_1$ and $x_2$, $x_3 = \lambda x_1 + (1-\lambda) x_2$ is also in $\mathbf{C}$, given $0 \geq \lambda \geq 1$.
+
+So, let's take two arbitrary vectors $x_1$ and $x_2$ belonging to $\mathbf{C} = \textbraceleft x|Ax \geq b \textbraceright$.
+
+We define a third member (that would be in the set if the set is convex) as $x_3 = \lambda x_1 + (1-\lambda) x_2$.  Let's assume it is not in the set, which would imply that $Ax_3 < b$ and we'll start there.
+
+Let's also take advantage of our definitions to say that, since $Ax_1$ and $Ax_2$ are $\geq b$, $Ax_1 = ( b + c)$ where all entries of $c$ must be $\geq 0$, and $Ax_2 = ( b + d)$ where all entries of $d$ must be $\geq 0$.
+
+So...
+
+$Ax_3 < b \implies$
+
+$A(\lambda x_1 + (1-\lambda) x_2) < b \implies$
+
+$\lambda A x_1 + A x_2 -\lambda A x_2 < b \implies$
+
+$\lambda (b+c) + b+d -\lambda (b+d) < b \implies$
+
+$\lambda (b+c) + d -\lambda (b+d) < 0 \implies$
+
+$\lambda b + \lambda c + d -\lambda b -\lambda d  < 0 \implies$
+
+$\lambda c + d -\lambda d  < 0 \implies$
+
+$\lambda c + (1-\lambda) d < 0$
+
+We also know that $\lambda$ is between $0$ and $1$, which means that $(1-\lambda)$ must also be between $0$ and $1$.
+
+Therefore, we have the equation
+
+$(\text{positive coefficient})(\text{nonnegative-entry vector})+(\text{positive coefficient})(\text{nonnegative-entry vector}) < 0$
+
+which is an impossible contradiction.
+
+The conclusion that $x_3 = \lambda x_1 + (\lambda - 1) x_2$ does not belong to $\mathbf{C}$ leads to a contradiction.  Therefore, $x_3$ must belong to $\mathbf{C}$.  
+
+We proved that for any two $x$'s, $x_1$ and $x_2$, $x_3 = \lambda x_1 + (\lambda - 1) x_2$ must belong to the set $\mathbf{C} = \textbraceleft x|Ax \geq b \textbraceright$.
+
+**Therefore, the set $\textbraceleft x|Ax \geq b \textbraceright$ must be convex.**
 
 19.	A function $f$ is said to have a global minimum at $x$ if for all $y$, $f(y) \geq f(x)$. It is said to have a local minimum at $x$ if there exists a neighborhood $H$ around $x$ so that for all $y$ in $H$, $f(y)\geq f(x)$. Show that, if $f$ is convex, every local minimum is a global minimum. [Hint: Prove by contradiction using Jensen’s inequality.] (10 points)
 
