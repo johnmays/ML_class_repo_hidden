@@ -170,7 +170,15 @@ Answer:
 25.	Using R/Matlab/Mathematica/python/your favorite software, plot the decision boundary for an ANN with two inputs, two hidden units and one output. All activation functions are sigmoids. Each layer is fully connected to the next. Assume the inputs range between −5 to 5 and fix all activation thresholds to 0. Plot the decision boundaries for  the weights except the thresholds randomly chosen between (i) (−10,10), (ii) (−3,3), (iii) (−0.1,0.1) (one random set for each case is enough). Use your plots to show that weight decay can be used to control overfitting for ANNs. (If you use Matlab, the following commands might be useful: meshgrid and surf). (20 points)
 
 Answer:
-_claimed by John_
+
+##### (i)
+<img src="/written_assignments/assets/HW4/25i.png" width="400">
+
+##### (ii)
+<img src="/written_assignments/assets/HW4/25ii.png" width="400">
+
+##### (iii)
+<img src="/written_assignments/assets/HW4/25iii.png" width="400">
 
 26.	When learning the weights for the perceptron, we dropped the *sign* activation function to make the objective smooth. Show that the same strategy does not work for an arbitrary ANN. (Hint: consider the shape of the decision boundary if we did this.)  (10 points)
 
