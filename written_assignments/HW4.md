@@ -173,12 +173,15 @@ Answer:
 
 ##### (i)
 <img src="/written_assignments/assets/HW4/25i.png" width="400">
+<img src="/written_assignments/assets/HW4/25i_surf.png" width="400">
 
 ##### (ii)
 <img src="/written_assignments/assets/HW4/25ii.png" width="400">
+<img src="/written_assignments/assets/HW4/25ii_surf.png" width="400">
 
 ##### (iii)
 <img src="/written_assignments/assets/HW4/25iii.png" width="400">
+<img src="/written_assignments/assets/HW4/25ii_surf.png" width="400">
 
 26.	When learning the weights for the perceptron, we dropped the *sign* activation function to make the objective smooth. Show that the same strategy does not work for an arbitrary ANN. (Hint: consider the shape of the decision boundary if we did this.)  (10 points)
 
