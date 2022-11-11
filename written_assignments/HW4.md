@@ -190,6 +190,18 @@ In summary, setting $W’\_{hi} = 0.5W\_{hi}$, $b’\_h = 0.5b_h$, $w’\_{oh} =
 
 Answer:
 
+![WeChat Image_20221111160645](https://user-images.githubusercontent.com/89466889/201430860-99deb587-ebd2-43d1-8418-811175c80026.png)
+
+
+Here is a demo of network haveing given example as inputs
+
+|x1|x2|h1|h2|h3|h4|y|
+|--|--|---|---|---|---|---|
+|-4|-4|-4*1<2=>-1|-4*1<-2=>-1|1+1>-2=>1|-1-1=-2=>-1|1-1<1=>-1|
+|-1|-1|-1*1<2=>-1|-1*1>-2=>1|1-1>-2=>1|-1+1>-2=>1|1+1>1=>1|
+|1|1|1*1<2=>-1|1*1>-2=>1|1-1>-2=>1|-1+1>-2=>1|1+1>1=>1|
+|4|4|4*1>2=>1|4*1>-2=>1|-1-1=-2=>-1|1+1>-2=>1|-1+1<1=>-1|
+
 25.	Using R/Matlab/Mathematica/python/your favorite software, plot the decision boundary for an ANN with two inputs, two hidden units and one output. All activation functions are sigmoids. Each layer is fully connected to the next. Assume the inputs range between −5 to 5 and fix all activation thresholds to 0. Plot the decision boundaries for  the weights except the thresholds randomly chosen between (i) (−10,10), (ii) (−3,3), (iii) (−0.1,0.1) (one random set for each case is enough). Use your plots to show that weight decay can be used to control overfitting for ANNs. (If you use Matlab, the following commands might be useful: meshgrid and surf). (20 points)
 
 Answer:
