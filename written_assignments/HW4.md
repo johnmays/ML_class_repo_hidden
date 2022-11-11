@@ -225,4 +225,5 @@ Weight decay essentially penalizes large absolute weight magnitudes, and the sur
 26.	When learning the weights for the perceptron, we dropped the *sign* activation function to make the objective smooth. Show that the same strategy does not work for an arbitrary ANN. (Hint: consider the shape of the decision boundary if we did this.)  (10 points)
 
 Answer:
-_claimed by John_
+
+Removing the sign activation function from all of the hidden & output nodes of an ANN removes any possibility of nonlinearity.  Doing so ensures that, by the output node, the output is still just a linear sum of all of the input nodes in this fashion $\hat{y} = w_{21}h_{1}+w_{22}h_{2} = w_{21}(w_{11}x_{1}+w_{12}x_{2})+w_{22}(w_{13}x_{1}+w_{14}x_{2})$.  Therefore, removing the sign to calculate the gradient of the loss more easily entirely defeats the purpose of an ANN.  It would just effectively be reduced to a perceptron.
