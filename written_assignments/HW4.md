@@ -71,6 +71,14 @@ This is a contradiction and by proving this contradiction we proved that there i
 
 Answer: 
 
+The blue part denote the feasible region and red part denote the non-feasible region.
+![Figure_1](https://user-images.githubusercontent.com/89466889/201288439-c3036a77-313f-4c9f-bde6-39a60c685034.png)
+
+![Figure_2](https://user-images.githubusercontent.com/89466889/201288505-a16ea69f-f1a5-42a3-b73e-1c4f63c7080a.png)
+
+In this case if we want to minimize $c^Tx$ we will pick [4,5] because it is the only points lies on the contour $c^Tx =−14$.
+
+
 21.	Consider the primal linear program (LP): $\min c^Tx$ s.t. $Ax \geq b, x \geq 0$ and its dual: $\max b^Tu$ s.t. $A^Tu \leq c, u \geq 0$. Prove that for any feasible $(x,u)$ (i.e. $x$ and $u$ satisfying the constraints of the two LPs), $b^Tu \leq c^Tx$. (10 points)
 
 Answer: Looking at the laws of matrix manipulation, this problem actually becomes fairly simple. The key is combining the two sets of constraints to essentially rewrite $b^Tu$ as $c^Tx$:
