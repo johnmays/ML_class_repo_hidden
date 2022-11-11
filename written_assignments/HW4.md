@@ -182,8 +182,10 @@ Answer:
 #### (iii)
 <img src="/written_assignments/assets/HW4/25iii.png" width="400">
 <img src="/written_assignments/assets/HW4/25iii_surf.png" width="300">
-Weight decay essentially penalizes large absolute weight magnitudes, and the surfaces above demonstrate the effects of and reasoning behind that.  As the weights decrease in allowed size, the surface, which defines the decision boundary + provides confidence information, decreases in complexity.  This is because, if we imagine each node in the netwwork as responsible for one nonlinearity, the weights determine the significance of that nonlinearity in the final model.  Smaller weights discourage large, numerous nonlinearities, which would be required for an overfit decision boundary.  As a necessary corollary, smaller weights would produce simpler models, and discourage overfitting.  Therefore weight decay discourages overfitting.
 
+Weight decay essentially penalizes large absolute weight magnitudes, and the surfaces above demonstrate the effects of and reasoning behind that.  As the weights decrease in allowed size, the surface, which defines the decision boundary + provides confidence information, decreases in complexity.  This is because, if we imagine each node in the netwwork as responsible for one nonlinearity, the weights determine the significance of that nonlinearity in the final model.  Smaller weights discourage large, numerous nonlinearities, which would be required for an overfit decision boundary.  As a necessary corollary, smaller weights would produce simpler models, and discourage overfitting.  
+
+**Therefore, weight decay discourages overfitting.**
 
 26.	When learning the weights for the perceptron, we dropped the *sign* activation function to make the objective smooth. Show that the same strategy does not work for an arbitrary ANN. (Hint: consider the shape of the decision boundary if we did this.)  (10 points)
 
