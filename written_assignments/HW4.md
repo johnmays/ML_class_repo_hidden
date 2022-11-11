@@ -51,6 +51,21 @@ We proved that for any two $x$'s, $x_1$ and $x_2$, $x_3 = \lambda x_1 + (\lambda
 19.	A function $f$ is said to have a global minimum at $x$ if for all $y$, $f(y) \geq f(x)$. It is said to have a local minimum at $x$ if there exists a neighborhood $H$ around $x$ so that for all $y$ in $H$, $f(y)\geq f(x)$. Show that, if $f$ is convex, every local minimum is a global minimum. [Hint: Prove by contradiction using Jensen’s inequality.] (10 points)
 
 Answer: 
+Given that we have a subset which $H \subseteq X$ where in that set f(x) is a local minimum. Assume outside this set H we have a $f(x_g) < f(x)$. By the definition of convexity we have:
+Since Jensen's inequality we have: 
+
+$f(\lambda x_g + (1-\lambda)x) \leq \lambda f(x_g)+(1-\lambda)f(x)$
+
+Since $f(x_g) < f(x)$ we have:
+
+$\lambda f(x_g)+(1-\lambda)f(x) \leq \lambda f(x)+(1-\lambda)f(x)=f(x)$
+
+Combine them we have:
+
+$f(\lambda x_g + (1-\lambda)x) \leq \lambda f(x_g)+(1-\lambda)f(x) \leq \lambda f(x)+(1-\lambda)f(x)=f(x)$
+
+In this case if we set $\lambda$ close enough to 0 until we observe that $\lambda x_g + (1-\lambda)x \in H$, the equation give us a result of $f(\lambda x_g + (1-\lambda)x) < f(x)$. However by our definition to f(x), $f(x) \leq f(\lambda x_g + (1-\lambda)x)$.
+This is a contradiction and by proving this contradiction we proved that there is no such $f(x_g)$ exist. Which at the same time proved that f(x) is a global minmum.
 
 20.	Consider the LP: $\min c^Tx$ s.t. $Ax \geq b, x \geq 0$, where $T$ is the transpose, $A$ is the 4x2 matrix: \[ 0 −1; −1 −1; −1 2; 1 −1\], $b$ is a 4x1 vector \[−5; −9;0; −3\] and $c$ is a 2x1 vector \[−1; −2\]. (a) Draw the feasible region in $R^2$. (b) Draw the contours of $c^Tx =−12$, $c^Tx =−14$ and $c^Tx =−16$ and determine the solution graphically. (10 points)
 
