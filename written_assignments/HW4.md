@@ -52,7 +52,6 @@ We proved that for any two $x$'s, $x_1$ and $x_2$, $x_3 = \lambda x_1 + (\lambda
 
 Answer: 
 Given that we have a subset which $H \subseteq X$ where in that set f(x) is a local minimum. Assume outside this set H we have a $f(x_g) < f(x)$. By the definition of convexity we have:
-Since Jensen's inequality we have: 
 
 $f(\lambda x_g + (1-\lambda)x) \leq \lambda f(x_g)+(1-\lambda)f(x)$
 
@@ -76,7 +75,7 @@ The blue part denote the feasible region and red part denote the non-feasible re
 
 ![Figure_2](https://user-images.githubusercontent.com/89466889/201288505-a16ea69f-f1a5-42a3-b73e-1c4f63c7080a.png)
 
-In this case if we want to minimize $c^Tx$ we will pick [4,5] because it is the only points lies on the contour $c^Tx =−14$.
+In this case if we want to minimize $c^Tx$ we will pick [4,5] because it is the only points lies on the vertex $c^Tx =−14$. The problem is convex so there will not be any other solution which has smaller $c^Tx$ than point [4,5].
 
 
 21.	Consider the primal linear program (LP): $\min c^Tx$ s.t. $Ax \geq b, x \geq 0$ and its dual: $\max b^Tu$ s.t. $A^Tu \leq c, u \geq 0$. Prove that for any feasible $(x,u)$ (i.e. $x$ and $u$ satisfying the constraints of the two LPs), $b^Tu \leq c^Tx$. (10 points)
