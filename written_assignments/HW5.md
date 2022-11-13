@@ -1,0 +1,61 @@
+# Written Homework 5
+
+Names and github IDs (if your github ID is not your name or Case ID):
+
+27.	Redo the backprop example done in class (lecture 10 slide 5) with one iteration of gradient descent instead of two iterations of SGD as done in class. Compare the average losses after GD and SGD. Discuss the differences you observe in the weights and the losses. (10 points)
+
+Answer: 
+
+Answer 28-30 with the following scenario. The Bayesian Candy Factory makes a Halloween Candy Box that contains a mix of yummy (Y) and crummy (C) candy. You know that each Box is one of three types: 1. 80% Y and 20% C, 2. 55% Y and 45% C and 3. 30% Y and 70% C. You open a Box and start munching candies. Let the $i^{th}$ candy you munch be denoted by $c_i$. Answer the following questions using a program written in any language of your choice. Generate one Box with 100 candies for each type, and assume a fixed order of munching.
+ 
+28.	For each Box, plot $\Pr(T=i|c_1,\ldots ,c_N)$ on a graph where $T$ represents a type and $N$ ranges from 1 to 100. (You should have three graphs and each graph will have three curves.) (10 points)
+
+Answer:
+
+29.	For each Box, plot $\Pr(c_{N+1}=C|c_1,\ldots ,c_N)$ where $N$ ranges from 1 to 99. (10 points)
+
+Answer:
+
+30.	Suppose before opening a Box you believe that each Box has 70% crummy candies (type 3) with probability 0.8 and the probability of the other two types is 0.1 each. Replot $\Pr(T=i|c_1,…,c_N)$ taking this belief into account for each of the 3 Boxes. Briefly explain the implications of your results. (10 points)
+
+Answer: 
+
+31.	For a constrained programming problem $\min_w f(w)$ s.t. $g_i(w) \leq 0, h_j(w)=0$, the generalized Lagrangian is defined by $L(w,\alpha,\beta)=f(w)+\sum_i \alpha_i g_i(w)+ \sum_j \beta_j h_j(w), \alpha_i \geq 0$. A primal linear program is a constrained program of the form: $\min_x c^Tx$ s.t. $Ax \geq b, x \geq 0$ where $T$ represents the transpose. Using the generalized Lagrangian, show that the dual form of the primal LP is $\max_u b^Tu$ s.t. $A^Tu \leq  c, u \geq 0$. (10 points)
+
+Answer:
+
+32.	Suppose $K_1$ and $K_2$ are two valid kernels. Show that for positive $a$ and $b$, the following are also valid kernels: (i) $aK_1+bK_2$ and (ii) $aK_1K_2$, where the product is the Hadamard product: if $K=K_1K_2$ then $K(x,y)=K_1(x,y)K_2(x,y)$. (10 points)
+
+Answer:
+
+33.	Define $K(x,y)=(x\cdot y+c)^2$, where $c$ is a positive constant and $x$ and $y$ are $n$-dimensional vectors. Show that K is a valid kernel by finding $\phi$ so that $K= \phi(x)\cdot \phi(y)$. (10 points)
+
+Answer:
+
+34.	Define $K(x,y)=(x\cdot y+c)^2$, where $c$ is a positive constant and $x$ and $y$ are $n$-dimensional vectors. Show that K is a valid kernel by showing that it is symmetric positive semidefinite. (10 points)
+
+Answer:
+
+35.	Consider a modified SVM formulation derived using the plus-plane at $w\cdot x+b=c_1$ and the minus-plane at $w\cdot x+b=c_2$ , $c_1>0, c_2<0, c_1\neq −c_2$. Explain the relationship between the decision surface obtained in this case and the decision surface obtained when $c_1= −c_2$. When would we prefer one over the other? (10 points)
+
+Answer:
+
+36.	Show with an example that an ensemble where elements have error rates worse than chance may have an overall error rate that is arbitrarily bad. (10 points)
+
+Answer:
+
+37.	Suppose an ensemble of size 100 has two types of classifiers: $k$ “good” ones with error rates equal to 0.2 each and $m$ “bad” ones with error rates 0.6 each ( $k + m = 100$ ). Examples are classified through a majority vote. Using your favorite software/language, find a range for $k$ so that the ensemble still has an error rate < 0.5. Attach a pdf of your code to the answer.  (10 points)
+
+Answer:
+
+38.	Suppose a learner uses bootstrap resampling to construct a training sample T  from an initial sample U, of the same size as U. Show that, for a large enough U, the probability that some example from U appears in T is approximately 0.63. (10 points)
+
+Answer:
+
+39.	When boosting with $m$ examples labeled with $\pm 1$, let the weight of the $i^{th}$ example in the $t^{th}$ iteration be denoted by $W_t (i)$. Prove the following identity:
+$W_{t+1} (i)$ $=exp(−y_i\sum_s \alpha_sh_s(x_i))/(m\prod_s Z_s)$.
+Here $Z_s$ denotes the normalizing constant during the $s^{th}$ iteration and   $1\leq s \leq t$. (You can treat the starting point as iteration zero.) (10 points)
+
+Answer:
+
+All done\!
