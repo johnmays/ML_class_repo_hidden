@@ -22,7 +22,32 @@ Answer:
 
 31.	For a constrained programming problem $\min_w f(w)$ s.t. $g_i(w) \leq 0, h_j(w)=0$, the generalized Lagrangian is defined by $L(w,\alpha,\beta)=f(w)+\sum_i \alpha_i g_i(w)+ \sum_j \beta_j h_j(w), \alpha_i \geq 0$. A primal linear program is a constrained program of the form: $\min_x c^Tx$ s.t. $Ax \geq b, x \geq 0$ where $T$ represents the transpose. Using the generalized Lagrangian, show that the dual form of the primal LP is $\max_u b^Tu$ s.t. $A^Tu \leq  c, u \geq 0$. (10 points)
 
-Answer:
+Answer: We’ve established that the form of a primal linear program is $\min_x c^Tx$ s.t. $Ax \geq b, x \geq 0$. If we try to convert this to a format that the Lagrangian accepts, we get the following problem:
+
+- $f(x) = c^T x$
+- $g_i(x) = b_i - (Ax)_i$
+
+Therefore, the generalized Lagrangian for this problem is
+
+$\ell(w, \alpha) = c^T w + \sum_i{\alpha_i (b_i - A_i w)}$
+
+where $A_i$ denotes the i-th row of $A$. This makes sense in the context of the *primal Lagrangian problem*, which frames the problem as $min_w max_{\alpha} \ell(w, \alpha)$. We’re predominantly trying to find the $w$ that minimizes $c^T w$. But, the Lagrangian cleverly includes the linear constraints using the $max_{\alpha}$: if $b_i - A_i w > 0$ for any constraint $i$, then the $\alpha$ that maximizes the statement would be infinity, forcing the problem to avoid that value of $w$. **This is how the problem encodes the linear constraints**, and understanding this is critical to deducing the dual linear program. 
+
+By using the rules of matrix multiplication, we can rewrite the Lagrangian in a way that keeps the same format. We start by establishing that $\sum_i{\alpha_i (b_i - A_i w)}$ is definitionally the same as $\alpha^T (b - A w)$. Then:
+
+- $\ell(w, \alpha) = c^T w + \alpha^T (b - A w)$
+- $\ell(w, \alpha) = w^c + \alpha^T b - \alpha^T A w$, by the distributive property of matrix multiplication
+- $\ell(w, \alpha) = w^T c + b^T \alpha - w^T A^T \alpha$, as all terms in the expression are scalars (1x1 matrices) and can be transposed with no effect
+- $\ell(w, \alpha) = b^T \alpha + w^T c - w^T A^T \alpha$
+- $\ell(w, \alpha) = b^T \alpha + w^T (c - A^T \alpha)$, by the distributive property of matrix multiplication
+- $\ell(w, \alpha) = b^T \alpha + \sum_i{w^T_{i} (c_{i} - A^T_{i} \alpha)}$
+
+This has essentially the same format as the original Lagrangian, but it’s in a format that’s easier to interpret for the dual problem. The *dual Lagrangian problem* frames the problem as $max_{\alpha} min_w \ell(w, \alpha)$, or
+
+$max_{\alpha} min_w (b^T \alpha + \sum_i{w^T_{i} (c_{i} - A^T_{i} \alpha)})$
+
+**This means that the dual linear problem predominantly aims to maximize $b_T \alpha$**. But, just like the primal problem, it’s subjected to encoded constraints: if $A^T_{i} \alpha$ ever exceeds $c_{i}$ at any index $i$, then $min_w$ would be able to minimize the statement by setting $w$ to infinity. **So, the dual problem is also subject to the constraint that $A^T \alpha \leq c$.** This is the same as the form of the dual linear program we learned in class. (It should really go without saying that $\alpha$ is interchangeable with $u$ in this problem-- it's just a different notation.)
+
 
 32.	Suppose $K_1$ and $K_2$ are two valid kernels. Show that for positive $a$ and $b$, the following are also valid kernels: (i) $aK_1+bK_2$ and (ii) $aK_1K_2$, where the product is the Hadamard product: if $K=K_1K_2$ then $K(x,y)=K_1(x,y)K_2(x,y)$. (10 points)
 
