@@ -51,11 +51,64 @@ $max_{\alpha} min_w (b^T \alpha + \sum_i{w^T_{i} (c_{i} - A^T_{i} \alpha)})$
 
 32.	Suppose $K_1$ and $K_2$ are two valid kernels. Show that for positive $a$ and $b$, the following are also valid kernels: (i) $aK_1+bK_2$ and (ii) $aK_1K_2$, where the product is the Hadamard product: if $K=K_1K_2$ then $K(x,y)=K_1(x,y)K_2(x,y)$. (10 points)
 
-Answer:
+Answer: If $K_1$ and $K_2$ are both valid kernels, then that means there’s some valid $\Phi$ functions $\Phi_1$ and $\Phi_2$ associated with them. If we can construct a Phi function for $K$ ($\Phi_{new}$) using them, then we can show that the resulting kernel function is valid.
+
+(i) If $K(x, y) = a K_1(x, y) + b K_2(x, y)$, then by definition of the kernel function,
+
+$K(x, y) = a (\Phi_1(x) \cdot \Phi_1(y)) + b (\Phi_2(x) \cdot \Phi_2(y))$
+
+$K(x, y) = \sum_i{(a \Phi_1(x)_i \Phi_1(y)_i)} + \sum_j{b (\Phi_2(x)_j \Phi_2(y)_j)}$
+
+$K(x, y) = \sum_i{(\sqrt{a} \Phi_1(x)_i \sqrt{a} \Phi_1(y)_i)} + \sum_j{(\sqrt{b} \Phi_2(x)_j \sqrt{b} \Phi_2(y)_j)}$
+
+Just by looking at this, it’s easy to imagine the associated $\Phi_{new}$ associated with this function:
+
+$\Phi_{new}(x) = \sqrt{a} \Phi_1(x) \oplus \sqrt{b} \Phi_2(x)$
+
+If you define K(x, y) as $\Phi_{new}(x) \cdot \Phi_{new}(y)$, then $K$ computes $a K_1(x, y) + b K_2(x, y)$.
+
+(ii) This one is trickier to represent. Similar to part (i), we can say that
+
+$K(x, y) = a (\Phi_1(x) \cdot \Phi_1(y)) (\Phi_2(x) \cdot \Phi_2(y))$
+
+Breaking down the dot product, this equals
+
+$K(x, y) = a (\sum_i{\Phi_{1, i}(x) \Phi_{1, i}(y)}) (\sum_j{\Phi_{2, j}(x) \Phi_{2, j}(y)})$
+
+$K(x, y) = a (\sum_{i,j}{(\Phi_{1, i}(x) \Phi_{2, j}(x)) (\Phi_{1, i}(y) \Phi_{2, j}(y))})$
+
+$K(x, y) = \sum_{i,j}{(\sqrt{a} \Phi_{1, i}(x) \Phi_{2, j}(x)) (\sqrt{a} \Phi_{1, i}(y) \Phi_{2, j}(y))}$
+
+If the vector produced by $\Phi_1$ is of length $M$, and the vector produced by $\Phi_2$ is of length $N$, this corresponds to a non-linear transformation $\Phi_{new}$ that produces a vector of length $MN$:
+
+**Because both kernels $K$ have a valid corresponding $\Phi$, both kernels are valid.**
+
 
 33.	Define $K(x,y)=(x\cdot y+c)^2$, where $c$ is a positive constant and $x$ and $y$ are $n$-dimensional vectors. Show that K is a valid kernel by finding $\phi$ so that $K= \phi(x)\cdot \phi(y)$. (10 points)
 
-Answer:
+Answer: This can be solved similarly to part (ii) from the previous problem. So long as we can rewrite the kernel function as a sum of products between expressions in terms of $x$ and expressions in terms of $y$, we can create a corresponding $\Phi$ function for the kernel.
+
+We can start by expanding the kernel function:
+
+$K(x, y) = (x \cdot y + c)^2$
+
+$K(x, y) = (x \cdot y + c) (x \cdot y + c)$
+
+$K(x, y) = (\sum_i{x_{i} y_{i}} + c) (\sum_j{x_{j} y_{j}} + c)$
+
+Then, by re-factoring the expression:
+
+$K(x, y) = \sum_i{x_{i} y_{i}} \sum_j{x_{j} y_{j}} + 2 c \sum_k{x_{k} y_{k}} + c^2$
+
+$K(x, y) = \sum_{i,j}{(x_{i} x_{j}) (y_{i} y_{j})} + \sum_k{(\sqrt{2c} x_{k}) (\sqrt{2c} y_{k})} + (c)(c)$
+
+At this point, it becomes clear that we can create a $\Phi(x)$ function for $K$. The transformation would be a concatenation of:
+- the products of all combinations of two values in $x$, with combinations with different values multiplied by $\sqrt{2}$
+- the original vector $x$ scaled by $\sqrt{2c}$
+- the value $c$
+
+$\Phi(x) = [x_1^2, \sqrt{2}x_1 x_2, … \sqrt{2}x_i x_j, …, x_N^2] \oplus [\sqrt{2c} x_1, \sqrt{2c} x_2, … \sqrt{2c} x_N] \oplus [c]$
+
 
 34.	Define $K(x,y)=(x\cdot y+c)^2$, where $c$ is a positive constant and $x$ and $y$ are $n$-dimensional vectors. Show that K is a valid kernel by showing that it is symmetric positive semidefinite. (10 points)
 
@@ -63,11 +116,17 @@ Answer:
 
 35.	Consider a modified SVM formulation derived using the plus-plane at $w\cdot x+b=c_1$ and the minus-plane at $w\cdot x+b=c_2$ , $c_1>0, c_2<0, c_1\neq −c_2$. Explain the relationship between the decision surface obtained in this case and the decision surface obtained when $c_1= −c_2$. When would we prefer one over the other? (10 points)
 
-Answer:
+Answer: When $c_1 = -c_2$, then the decision boundary for the SVM will be placed exactly ‘in the middle’ between the positive and negative support vectors. That is, the decision boundary will have an equal margin on both sides between itself and the positive/negative training data. If we had $c_1 \neq -c_2$, then the decision would fall closer to one support vector, and one of the two sides would have a smaller margin. If $c_1 > -c_2$, for instance, then the positive examples would have a greater margin than the negative examples.
+
+Which setting we prefer is determined by how we want to classify ambiguous examples. If we want ambiguous examples to be considered positive to “be safe” (e.g. testing for COVID), then we would want the margin for the plus-plane to be much larger than the margin for the minus-plane, and so we would want $c_1 > -c_2$. But, if we don’t have a preference for how ambiguous examples are classified, we wouldn’t have any reason to add this bias, and it would be preferable to keep $c_1 = -c_2$.
+
 
 36.	Show with an example that an ensemble where elements have error rates worse than chance may have an overall error rate that is arbitrarily bad. (10 points)
 
-Answer:
+Answer: If the error rate $\epsilon$ for the classifiers is even slightly greater than 0.5 (i.e. worse than chance), then with enough classifiers, the majority vote of the ensemble is virtually guaranteed to be incorrect. This is because the expected number of incorrect votes will be **slightly** greater than half of the number of classifiers– to be exact, with $n$ classifiers, and with $\epsilon > 0.5$, the expectation of the binomial distribution is $n \epsilon > 0.5 n$. With a small number of classifiers, the expectation may consistently be close enough to half the classifiers for the overall error rate to stay around 0.5. **But, if the number of classifiers is large, then the expected number of incorrect votes will grow far beyond half of the number of classifiers.** As such, the error rate of the ensemble can be arbitrarily bad, as the ‘bulk’ of the binomial distribution gets shifted past the majority threshold.
+
+An example of this is illustrated in binomial.pdf. The chart plots the probability that $x$ classifiers guess incorrectly over $x$, with 999999 classifiers, given that all classifiers have an error rate of 0.501. The chart turns green at x = 500000, the point at which the incorrect votes would become the majority. It’s easy to see that virtually the entirety of the probability mass is past this point– in fact, 97.71% of the time, more than half of the classifiers will produce the wrong answer. With an error rate of 0.502, this chance becomes 99.99%. **Even with an error rate marginally worse than chance, the ensemble is essentially guaranteed to fail.**
+
 
 37.	Suppose an ensemble of size 100 has two types of classifiers: $k$ “good” ones with error rates equal to 0.2 each and $m$ “bad” ones with error rates 0.6 each ( $k + m = 100$ ). Examples are classified through a majority vote. Using your favorite software/language, find a range for $k$ so that the ensemble still has an error rate < 0.5. Attach a pdf of your code to the answer.  (10 points)
 
