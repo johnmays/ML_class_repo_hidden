@@ -36,7 +36,7 @@ where $A_i$ denotes the i-th row of $A$. This makes sense in the context of the 
 By using the rules of matrix multiplication, we can rewrite the Lagrangian in a way that keeps the same format. We start by establishing that $\sum_i{\alpha_i (b_i - A_i w)}$ is definitionally the same as $\alpha^T (b - A w)$. Then:
 
 - $\ell(w, \alpha) = c^T w + \alpha^T (b - A w)$
-- $\ell(w, \alpha) = w^c + \alpha^T b - \alpha^T A w$, by the distributive property of matrix multiplication
+- $\ell(w, \alpha) = w^T c + \alpha^T b - \alpha^T A w$, by the distributive property of matrix multiplication
 - $\ell(w, \alpha) = w^T c + b^T \alpha - w^T A^T \alpha$, as all terms in the expression are scalars (1x1 matrices) and can be transposed with no effect
 - $\ell(w, \alpha) = b^T \alpha + w^T c - w^T A^T \alpha$
 - $\ell(w, \alpha) = b^T \alpha + w^T (c - A^T \alpha)$, by the distributive property of matrix multiplication
@@ -46,7 +46,7 @@ This has essentially the same format as the original Lagrangian, but it’s in a
 
 $max_{\alpha} min_w (b^T \alpha + \sum_i{w^T_{i} (c_{i} - A^T_{i} \alpha)})$
 
-**This means that the dual linear problem predominantly aims to maximize $b_T \alpha$**. But, just like the primal problem, it’s subjected to encoded constraints: if $A^T_{i} \alpha$ ever exceeds $c_{i}$ at any index $i$, then $min_w$ would be able to minimize the statement by setting $w$ to infinity. **So, the dual problem is also subject to the constraint that $A^T \alpha \leq c$.** This is the same as the form of the dual linear program we learned in class. (It should really go without saying that $\alpha$ is interchangeable with $u$ in this problem-- it's just a different notation.)
+**This means that the dual linear problem predominantly aims to maximize $b_T \alpha$**. But, just like the primal problem, it’s subjected to encoded constraints: if $A^T_{i} \alpha$ ever exceeds $c_{i}$ at any index $i$, then $min_w$ would be able to minimize the statement to negative infinity by setting $w_{i}$ to infinity. **So, the dual problem is also subject to the constraint that $A^T \alpha \leq c$.** This is the same as the form of the dual linear program we learned in class. (It should really go without saying that $\alpha$ is interchangeable with $u$ in this problem-- it's just a different notation.)
 
 
 32.	Suppose $K_1$ and $K_2$ are two valid kernels. Show that for positive $a$ and $b$, the following are also valid kernels: (i) $aK_1+bK_2$ and (ii) $aK_1K_2$, where the product is the Hadamard product: if $K=K_1K_2$ then $K(x,y)=K_1(x,y)K_2(x,y)$. (10 points)
