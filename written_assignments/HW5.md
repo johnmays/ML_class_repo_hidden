@@ -112,7 +112,7 @@ $\Phi(x) = [x_1^2, \sqrt{2}x_1 x_2, … \sqrt{2}x_i x_j, …, x_N^2] \oplus [\sq
 
 34.	Define $K(x,y)=(x\cdot y+c)^2$, where $c$ is a positive constant and $x$ and $y$ are $n$-dimensional vectors. Show that K is a valid kernel by showing that it is symmetric positive semidefinite. (10 points)
 
-Answer:
+Answer: Claimed by John
 
 35.	Consider a modified SVM formulation derived using the plus-plane at $w\cdot x+b=c_1$ and the minus-plane at $w\cdot x+b=c_2$ , $c_1>0, c_2<0, c_1\neq −c_2$. Explain the relationship between the decision surface obtained in this case and the decision surface obtained when $c_1= −c_2$. When would we prefer one over the other? (10 points)
 
