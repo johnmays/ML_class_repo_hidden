@@ -157,7 +157,10 @@ An example of this is illustrated in binomial.pdf. The chart plots the probabili
 
 37.	Suppose an ensemble of size 100 has two types of classifiers: $k$ “good” ones with error rates equal to 0.2 each and $m$ “bad” ones with error rates 0.6 each ( $k + m = 100$ ). Examples are classified through a majority vote. Using your favorite software/language, find a range for $k$ so that the ensemble still has an error rate < 0.5. Attach a pdf of your code to the answer.  (10 points)
 
-Answer:
+Answer:Based on my plot we will need at least 24 good classifiers to make sure our error rate is lower than 0.5.
+
+![Figure_1](https://user-images.githubusercontent.com/89466889/202819772-d459e1a3-f2fc-411d-9c6c-c71281931ee6.png)
+
 
 38.	Suppose a learner uses bootstrap resampling to construct a training sample T  from an initial sample U, of the same size as U. Show that, for a large enough U, the probability that some example from U appears in T is approximately 0.63. (10 points)
 
