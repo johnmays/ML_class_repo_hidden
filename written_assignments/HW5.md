@@ -10,15 +10,42 @@ Answer 28-30 with the following scenario. The Bayesian Candy Factory makes a Hal
  
 28.	For each Box, plot $\Pr(T=i|c_1,\ldots ,c_N)$ on a graph where $T$ represents a type and $N$ ranges from 1 to 100. (You should have three graphs and each graph will have three curves.) (10 points)
 
-Answer:
+Answer: A assume we are using uniform prior in this question which all three type has 0.33 probability at first.
+
+![Figure_1](https://user-images.githubusercontent.com/89466889/202752367-c71fd556-c589-4bc1-a1fa-24effb027d63.png)
+
+![Figure_3](https://user-images.githubusercontent.com/89466889/202752466-aa8e15df-1e5c-49e4-afa2-941c3100aa11.png)
+
+![Figure_5](https://user-images.githubusercontent.com/89466889/202752490-4f7ca9d2-4947-4c37-aff5-01f1ab4405a0.png)
+
 
 29.	For each Box, plot $\Pr(c_{N+1}=C|c_1,\ldots ,c_N)$ where $N$ ranges from 1 to 99. (10 points)
 
 Answer:
 
+![Figure_2](https://user-images.githubusercontent.com/89466889/202752525-67d99577-ad48-4257-b831-6e9de78db7e1.png)
+
+![Figure_4](https://user-images.githubusercontent.com/89466889/202752545-754a7007-f38f-4354-a648-8d2bceaa8f05.png)
+
+![Figure_6](https://user-images.githubusercontent.com/89466889/202752566-9f47b7b0-d500-498a-a43d-b61ca4904529.png)
+
+
 30.	Suppose before opening a Box you believe that each Box has 70% crummy candies (type 3) with probability 0.8 and the probability of the other two types is 0.1 each. Replot $\Pr(T=i|c_1,…,c_N)$ taking this belief into account for each of the 3 Boxes. Briefly explain the implications of your results. (10 points)
 
-Answer: 
+Answer: I have redo the procedure in 28 and 29 with the new prior. Nothing really changes after a certain amout of candy been opened. 
+
+![Figure_7](https://user-images.githubusercontent.com/89466889/202753031-ee185574-3328-4706-a0e8-9505aae02946.png)
+
+![Figure_8](https://user-images.githubusercontent.com/89466889/202753034-4979d673-d0f7-4b66-aace-6ccb745d0c2c.png)
+
+![Figure_9](https://user-images.githubusercontent.com/89466889/202753035-7fd31fa8-a4f7-4663-b21c-8f4151bb137a.png)
+
+![Figure_10](https://user-images.githubusercontent.com/89466889/202753036-c5df6ee3-42c7-4ba4-9a92-017e6468e504.png)
+
+![Figure_11](https://user-images.githubusercontent.com/89466889/202753037-b342cd16-2891-482b-b1f8-89eea6b10080.png)
+
+![Figure_12](https://user-images.githubusercontent.com/89466889/202753039-ad13147a-acf1-4540-adef-acc28cbfd473.png)
+
 
 31.	For a constrained programming problem $\min_w f(w)$ s.t. $g_i(w) \leq 0, h_j(w)=0$, the generalized Lagrangian is defined by $L(w,\alpha,\beta)=f(w)+\sum_i \alpha_i g_i(w)+ \sum_j \beta_j h_j(w), \alpha_i \geq 0$. A primal linear program is a constrained program of the form: $\min_x c^Tx$ s.t. $Ax \geq b, x \geq 0$ where $T$ represents the transpose. Using the generalized Lagrangian, show that the dual form of the primal LP is $\max_u b^Tu$ s.t. $A^Tu \leq  c, u \geq 0$. (10 points)
 
