@@ -164,7 +164,20 @@ Answer:Based on my plot we will need at least 24 good classifiers to make sure o
 
 38.	Suppose a learner uses bootstrap resampling to construct a training sample T  from an initial sample U, of the same size as U. Show that, for a large enough U, the probability that some example from U appears in T is approximately 0.63. (10 points)
 
-Answer:
+Answer: For this question, we are asked to compute the probability that a specific example from U will exist in T. Rather than computer the probability of specific example will exist, I will compute the probability that the example does not exist.
+
+The equation for a specific example does not exist in T is: $\lim_{u \to \infty} (1-\frac{1}{u})^{u}$
+
+This equals to: $\lim_{u \to \infty} e^{u ln(1-\frac{1}{u})}$
+
+Transform u at the power of e we get: $\lim_{u \to \infty} e^{\frac{ln(1-\frac{1}{u})}{\frac{1}{u}}}$
+
+Then apply the L'Hopital's Rule: $\lim_{u \to \infty} e^{\frac{\frac{1}{u^2}\frac{1}{1+\frac{-1}{u}}}{-\frac{1}{u^2}}}=\lim_{u \to \infty} e^{\frac{-1}{1+\frac{-1}{u}}}=e^{-1}$
+
+Then the probability of a specific example is not in T is $e^{-1}=0.37$
+
+Thus the probability that a specific example is in T is one minus the probability a specific example is not in T which will be: $1-e^{-1}=1-0.37=0.63$
+
 
 39.	When boosting with $m$ examples labeled with $\pm 1$, let the weight of the $i^{th}$ example in the $t^{th}$ iteration be denoted by $W_t (i)$. Prove the following identity:
 $W_{t+1} (i)$ $=exp(−y_i\sum_s \alpha_sh_s(x_i))/(m\prod_s Z_s)$.
