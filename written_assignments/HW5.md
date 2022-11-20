@@ -5,6 +5,12 @@ Names and github IDs (if your github ID is not your name or Case ID):
 27.	Redo the backprop example done in class (lecture 10 slide 5) with one iteration of gradient descent instead of two iterations of SGD as done in class. Compare the average losses after GD and SGD. Discuss the differences you observe in the weights and the losses. (10 points)
 
 Answer: 
+I'm assuming Lecture 11 Slide 4 is meant here.
+
+I'm also going to assume the nonlinearity function $h(u)$ is sigmoid, since it isn't specified.
+
+**SGD:**
+
 
 Answer 28-30 with the following scenario. The Bayesian Candy Factory makes a Halloween Candy Box that contains a mix of yummy (Y) and crummy (C) candy. You know that each Box is one of three types: 1. 80% Y and 20% C, 2. 55% Y and 45% C and 3. 30% Y and 70% C. You open a Box and start munching candies. Let the $i^{th}$ candy you munch be denoted by $c_i$. Answer the following questions using a program written in any language of your choice. Generate one Box with 100 candies for each type, and assume a fixed order of munching.
  
