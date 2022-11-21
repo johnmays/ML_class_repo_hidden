@@ -7,11 +7,17 @@ Names and github IDs (if your github ID is not your name or Case ID):
 Answer: 
 I'm assuming Lecture 11 Slide 4 is meant here.
 
-I'm also going to assume the nonlinearity function $h(u)$ is sigmoid, since it isn't specified.
+I'm assuming the nonlinearity function $h(u)$ is sigmoid, since that is what was in the slides.
+
+$\eta = 10$
 
 **SGD:**
+After two rounds of SGD, $w = [1, 1, 1.053, 1.053, 0.340, 0.340]$
 
-:(
+**GD:**
+After regular GD, $w = [1, 1, 1.053, 1.053, 0.491, 0.491]$
+
+After normal gradient descent, the weights change less, essentially because of the triangle inequality: $|a+b| \leq |a| + |b|$.  The plain loss (squared error) after gradient descent is greater than that after stochastic gradient descent, however.  This is because stochastic gradient descent can be influenced by fine differences between examples, ones that would otherwise be lost in the sum of normal gradient descent.
 
 Answer 28-30 with the following scenario. The Bayesian Candy Factory makes a Halloween Candy Box that contains a mix of yummy (Y) and crummy (C) candy. You know that each Box is one of three types: 1. 80% Y and 20% C, 2. 55% Y and 45% C and 3. 30% Y and 70% C. You open a Box and start munching candies. Let the $i^{th}$ candy you munch be denoted by $c_i$. Answer the following questions using a program written in any language of your choice. Generate one Box with 100 candies for each type, and assume a fixed order of munching.
  
