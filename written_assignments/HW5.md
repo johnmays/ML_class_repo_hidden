@@ -121,6 +121,8 @@ $K(x, y) = \sum_{i,j}{(\sqrt{a} \Phi_{1, i}(x) \Phi_{2, j}(x)) (\sqrt{a} \Phi_{1
 
 If the vector produced by $\Phi_1$ is of length $M$, and the vector produced by $\Phi_2$ is of length $N$, this corresponds to a non-linear transformation $\Phi_{new}$ that produces a vector of length $MN$:
 
+$\Phi_{new}(x) = [\sqrt{a} \Phi_{1, 1}(x) \Phi_{2, 1}(x), \sqrt{2a} \Phi_{1, 1}(x) \Phi_{2, 2}(x), …, \sqrt{2a} \Phi_{1, i}(x) \Phi_{2, j}(x), …, \sqrt{a} \Phi_{1, M}(x) \Phi_{2, N}(x)]$
+
 **Because both kernels $K$ have a valid corresponding $\Phi$, both kernels are valid.**
 
 
