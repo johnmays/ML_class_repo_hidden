@@ -11,6 +11,7 @@ I'm also going to assume the nonlinearity function $h(u)$ is sigmoid, since it i
 
 **SGD:**
 
+:(
 
 Answer 28-30 with the following scenario. The Bayesian Candy Factory makes a Halloween Candy Box that contains a mix of yummy (Y) and crummy (C) candy. You know that each Box is one of three types: 1. 80% Y and 20% C, 2. 55% Y and 45% C and 3. 30% Y and 70% C. You open a Box and start munching candies. Let the $i^{th}$ candy you munch be denoted by $c_i$. Answer the following questions using a program written in any language of your choice. Generate one Box with 100 candies for each type, and assume a fixed order of munching.
  
@@ -145,7 +146,15 @@ $\Phi(x) = [x_1^2, \sqrt{2}x_1 x_2, … \sqrt{2}x_i x_j, …, x_N^2] \oplus [\sq
 
 34.	Define $K(x,y)=(x\cdot y+c)^2$, where $c$ is a positive constant and $x$ and $y$ are $n$-dimensional vectors. Show that K is a valid kernel by showing that it is symmetric positive semidefinite. (10 points)
 
-Answer: Claimed by John
+Answer:
+
+$K$ is symmetric because for any two vectors $x$ and $y$, (which also determine the coordinates of the kernel entry), $K(x,y) = (x \cdot y + c)^{2} = (y \cdot x + c)^{2} = K(y,x)$.
+
+$K$ is positive semi-definite.
+
+**Proof:**
+
+Define a matrix $B$ as $\frac{1}{\sqrt{m}}A$ where every entry in the $i^{th}$ row of $A$ is $(x_i)$
 
 35.	Consider a modified SVM formulation derived using the plus-plane at $w\cdot x+b=c_1$ and the minus-plane at $w\cdot x+b=c_2$ , $c_1>0, c_2<0, c_1\neq −c_2$. Explain the relationship between the decision surface obtained in this case and the decision surface obtained when $c_1= −c_2$. When would we prefer one over the other? (10 points)
 
