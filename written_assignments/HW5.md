@@ -191,4 +191,41 @@ Here $Z_s$ denotes the normalizing constant during the $s^{th}$ iteration and   
 
 Answer:
 
-All done\!
+We are considering this for one example, the $i^{th}$.
+
+We start with the definition of a single iteration's weight update as:
+
+$w_{t+1}(i)=\frac{1}{Z_t}e^{-\alpha_t y_i h_t(x_i)}w_{t}(i)$
+
+#### Proof by Induction:
+**Base Case:**
+
+$w_{0} = \frac{1}{m}$
+
+$w_{1} = \frac{1}{Z_0}e^{-\alpha_0 y_i h_0(x_i)}w_{0}(i)$ (by definition)
+
+$w_{1} = \frac{1}{m}\frac{1}{Z_0}e^{-\alpha_0 y_i h_0(x_i)}$
+
+$w_{2} = \frac{1}{m}\frac{1}{Z_0 \times Z_1}e^{-\alpha_1 y_i h_1(x_i)} e^{-\alpha_0 y_i h_0(x_i)}= \frac{1}{m}\frac{1}{\sum_s Z_s}e^{-y_i \sum_s \alpha_s h_s(x_i)}$, where $0\leq s \leq 1$
+
+$\checkmark$ *holds for base case of* $w_{2}$
+
+**Induction Step:**
+
+*We assume this is true for arbitrary step $t$:
+
+$w_{t}(i)=\frac{1}{m}\frac{1}{\sum_s Z_s}e^{-y_i \sum_s \alpha_s h_s(x_i)}$, where $1\leq s \leq t-1$
+
+we then use this and our defintion to prove it is true for step $t+1$:
+
+$w_{t+1}(i)=\frac{1}{Z_t}e^{-\alpha_t y_i h_t(x_i)}(w_{t}(i))$
+
+$w_{t+1}(i)=\frac{1}{Z_t}e^{-\alpha_t y_i h_t(x_i)} \frac{1}{m}\frac{1}{\sum_s Z_s}e^{-y_i \sum_s \alpha_s h_s(x_i)}$, where $1\leq s \leq (t-1)$
+
+$w_{t+1}(i)= \frac{1}{m}\frac{1}{Z_t \times \sum_s Z_s}e^{-\alpha_t y_i h_t(x_i) + -y_i \sum_s \alpha_s h_s(x_i)}$, where $1\leq s \leq (t-1)$
+
+$w_{t+1}(i)= \frac{1}{m}\frac{1}{\sum_s Z_s}e^{-y_i \sum_s \alpha_s h_s(x_i)}$, where $1\leq s \leq t$
+
+$\checkmark$ *holds for arbitrary sequential iteration*
+
+Therefore, $w_{t+1}(i)= \frac{1}{m \sum_s Z_s}e^{-y_i \sum_s \alpha_s h_s(x_i)}$, where $1\leq s \leq t$
