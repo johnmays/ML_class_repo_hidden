@@ -154,7 +154,13 @@ $K$ is positive semi-definite.
 
 **Proof:**
 
-Define a matrix $B$ as $\frac{1}{\sqrt{m}}A$ where every entry in the $i^{th}$ row of $A$ is $(x_i)$
+Using our answer from **33**, we can definte the entries of matrix $K$ as $K_{ij} = (x_i \cdot x_j + c)^{2} = \Phi(x_i)\Phi(x_j)$, which implies that $K$ is equivalent to $B^{T}B=B^{T}B$ where $B = \frac{1}{\sqrt{m}} A$ and every entry in the $i^{th}$ row of $B$ is $\Phi(x_i)$.
+
+Then, you would have $K = K^{T} = B^{T}B = \frac{1}{m}A^{T}A$, where $K_{ij} = \frac{1}{m} A_{i} A^{T}_{j} = \frac{1}{m} (m\Phi(x_i)\Phi(x_j))=\Phi(x_i)\Phi(x_j)$.
+
+Since $K$ can be decomposed into the product of a matrix and its transpose, $K$ is positive semi-definite.
+
+**Therefore, $K$ is symmetrix positive semi-definite.**
 
 35.	Consider a modified SVM formulation derived using the plus-plane at $w\cdot x+b=c_1$ and the minus-plane at $w\cdot x+b=c_2$ , $c_1>0, c_2<0, c_1\neq −c_2$. Explain the relationship between the decision surface obtained in this case and the decision surface obtained when $c_1= −c_2$. When would we prefer one over the other? (10 points)
 
