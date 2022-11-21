@@ -17,7 +17,7 @@ After two rounds of SGD, $w = [1, 1, 1.053, 1.053, 0.340, 0.340]$
 **GD:**
 After regular GD, $w = [1, 1, 1.053, 1.053, 0.491, 0.491]$
 
-After normal gradient descent, the weights change less, essentially because of the triangle inequality: $|a+b| \leq |a| + |b|$.  The plain loss (squared error) after gradient descent is greater than that after stochastic gradient descent, however.  This is because stochastic gradient descent can be influenced by fine differences between examples, ones that would otherwise be lost in the sum of normal gradient descent.
+After normal gradient descent, the weights change less, essentially because of the triangle inequality: $|a+b| \leq |a| + |b|$.  However, the plain loss (squared error) after gradient descent is greater than that after stochastic gradient descent.  This is because stochastic gradient descent can be influenced by fine differences between examples, ones that would otherwise be lost in the sum of normal gradient descent.
 
 Answer 28-30 with the following scenario. The Bayesian Candy Factory makes a Halloween Candy Box that contains a mix of yummy (Y) and crummy (C) candy. You know that each Box is one of three types: 1. 80% Y and 20% C, 2. 55% Y and 45% C and 3. 30% Y and 70% C. You open a Box and start munching candies. Let the $i^{th}$ candy you munch be denoted by $c_i$. Answer the following questions using a program written in any language of your choice. Generate one Box with 100 candies for each type, and assume a fixed order of munching.
  
