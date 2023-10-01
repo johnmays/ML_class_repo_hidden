@@ -1,6 +1,10 @@
-# CSDS 440 Group Repository: Group 12
+# Note:
+This is a clone of the private repository my group and I contributed to during the graduate ML class I took at my school.  I am keeping this repository public for a short amount of time to easily share with potential employers.  I have made edits and made certain things intentionally vague so that current students cannot track this repository down through any search engine and attempt to cheat with it.  If you are a student, then turn back.  The last person who used a repo of mine that was unintentionally left public to cheat at my former school was easily found out.
 
-This repository contains the files for the group homework assigned in Professor Ray's Fall 2023 CSDS 440 Class. This repository belongs to Group 12:
+
+# _______ Group Repository: Group 12
+
+This repository contains the files for the group homework assigned in Professor ___'s Fall 2023 ______ Class. This repository belongs to Group 12:
 
 - John Mays `johnmays`
 - Zaichuan You `ZaichuanYou`
